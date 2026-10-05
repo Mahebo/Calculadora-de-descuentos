@@ -19,7 +19,7 @@ export interface HistoryEntry {
   items: Item[];
 }
 
-function exampleState(): State {
+export function exampleState(): State {
   return {
     pct: 43,
     examples: true,

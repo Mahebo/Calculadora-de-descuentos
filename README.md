@@ -17,3 +17,5 @@ pnpm test      # pruebas de cálculo con Vitest
 ```
 
 `pnpm build` genera un sitio estático en `dist/`, listo para cualquier hosting de archivos estáticos.
+
+La URL pública (`site` en `astro.config.mjs`) es la base de la URL canónica, las etiquetas Open Graph, `robots.txt` y el sitemap. Si cambia el dominio, se cambia solo ahí.

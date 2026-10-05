@@ -3,11 +3,20 @@ import '@fontsource-variable/bricolage-grotesque/opsz.css';
 import '../styles/global.css';
 
 interface Props {
+  /** <title> y título de buscadores. */
   title: string;
   description: string;
+  /** Título al compartir (Open Graph y X). Por defecto, title. */
+  ogTitle?: string;
+  /** Imagen al compartir, ruta dentro de public/. */
+  image: { src: string; width: number; height: number; alt: string };
 }
 
-const { title, description } = Astro.props;
+const { title, description, ogTitle = title, image } = Astro.props;
+
+if (!Astro.site) throw new Error('Falta `site` en astro.config.mjs: hace falta para las URL absolutas.');
+const canonical = new URL(Astro.url.pathname, Astro.site).href;
+const imageUrl = new URL(image.src, Astro.site).href;
 ---
 
 <!doctype html>
@@ -15,10 +24,38 @@ const { title, description } = Astro.props;
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content={description} />
-    <meta name="color-scheme" content="light" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <meta name="author" content="Mauro Hernández" />
+    <meta name="color-scheme" content="light" />
+    <meta name="theme-color" content="#eef0fa" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+
+    {/* Open Graph */}
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Mahebo" />
+    <meta property="og:locale" content="es_CO" />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:title" content={ogTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={imageUrl} />
+    <meta property="og:image:type" content="image/jpeg" />
+    <meta property="og:image:width" content={String(image.width)} />
+    <meta property="og:image:height" content={String(image.height)} />
+    <meta property="og:image:alt" content={image.alt} />
+
+    {/* X / Twitter */}
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={ogTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={imageUrl} />
+    <meta name="twitter:image:alt" content={image.alt} />
+
+    <slot name="head" />
   </head>
   <body class="min-h-dvh px-4 pt-7 pb-12 text-[15px] leading-[1.45] text-ink sm:pt-10">
     <slot />

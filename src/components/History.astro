@@ -1,3 +1,7 @@
+---
+import { EMPTY_HISTORY, emptyState } from '../lib/ui';
+---
+
 <section class="card flex flex-col gap-4 p-5 sm:p-6 lg:col-start-1" aria-label="Historial">
   <h2 class="m-0 text-[1.2rem] font-semibold">Historial</h2>
   <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:rounded-full sm:bg-soft sm:p-1.5 sm:pl-2">
@@ -14,7 +18,9 @@
     </button>
   </div>
   <p class="note px-1" id="histNote">Se guarda solo en este navegador. Cargar una lista reemplaza la actual.</p>
-  <div class="flex flex-col gap-2" id="histList"></div>
+  <div class="flex flex-col gap-2" id="histList">
+    <div class={emptyState}>{EMPTY_HISTORY}</div>
+  </div>
 </section>
 
 <template id="hist-tpl">

@@ -1,5 +1,14 @@
 ---
 import Sparkle from './Sparkle.astro';
+import { clampPct, money, num, type Totals } from '../lib/calc';
+
+/** Estado inicial, renderizado en el build. */
+interface Props {
+  totals: Totals;
+  pct: number | string;
+}
+
+const { totals, pct } = Astro.props;
 ---
 
 <section class="flex flex-col gap-4 lg:sticky lg:top-6 lg:col-start-2 lg:row-span-2 lg:row-start-2 lg:self-start">
@@ -14,7 +23,7 @@ import Sparkle from './Sparkle.astro';
         id="pay"
         class="relative mt-3 text-[3rem] leading-none font-bold tracking-[-0.02em] tabular-nums wrap-anywhere max-sm:text-[2.4rem]"
       >
-        $0
+        {money(totals.pay)}
       </div>
       <p class="relative mt-3 text-[.9rem] text-ink/75">Suma con descuento de los ítems activos.</p>
     </div>
@@ -24,10 +33,10 @@ import Sparkle from './Sparkle.astro';
         id="gain"
         class="mt-2.5 text-[1.9rem] leading-none font-bold tracking-[-0.01em] text-mint-ink tabular-nums wrap-anywhere max-sm:text-[1.6rem]"
       >
-        $0
+        {money(totals.gain)}
       </div>
       <p class="mt-3 text-[.9rem] text-ink/75">
-        Suma de precio total menos total a pagar (<span id="pctEcho">43</span> % del total).
+        Suma de precio total menos total a pagar (<span id="pctEcho">{num(clampPct(pct))}</span> % del total).
       </p>
     </div>
   </div>

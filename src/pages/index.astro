@@ -4,20 +4,55 @@ import Header from '../components/Header.astro';
 import ItemsTable from '../components/ItemsTable.astro';
 import Results from '../components/Results.astro';
 import History from '../components/History.astro';
+import { summarize } from '../lib/calc';
+import { exampleState } from '../lib/storage';
+
+// Estado inicial (filas de ejemplo) generado en el build: lo ven los buscadores y la página no
+// salta al cargar. El script lo vuelve a dibujar con lo guardado en el navegador, si hay algo.
+const initial = exampleState();
+const totals = summarize(initial.items, initial.pct);
+
+const title = 'Calculadora de Descuentos para Emprendedores | Mahebo';
+const ogTitle = 'Calculadora de descuentos para emprendedores';
+const description =
+  'Calcula descuentos y conoce con precisión cuánto ganas en cada venta. Una herramienta para emprendedores que te ayuda a controlar tu margen de ganancia al ofrecer o recibir descuentos.';
+// Si cambias public/ogimage.jpg, actualiza aquí sus medidas.
+const image = {
+  src: '/ogimage.jpg',
+  width: 1672,
+  height: 941,
+  alt: 'Calculadora de descuentos: etiqueta de precio con el símbolo de porcentaje',
+};
+
+const site = Astro.site?.href;
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebApplication',
+  name: ogTitle,
+  url: site,
+  description,
+  image: site && new URL(image.src, site).href,
+  inLanguage: 'es',
+  applicationCategory: 'BusinessApplication',
+  operatingSystem: 'Web',
+  browserRequirements: 'Requiere JavaScript.',
+  isAccessibleForFree: true,
+  offers: { '@type': 'Offer', price: '0', priceCurrency: 'COP' },
+  author: { '@type': 'Person', name: 'Mauro Hernández', url: 'https://mahebo.com' },
+  publisher: { '@type': 'Organization', name: 'Mahebo', url: 'https://mahebo.com' },
+};
 ---
 
-<Base
-  title="Calculadora de descuento"
-  description="Agrega ítems con precio por unidad y cantidad. El total y el descuento se calculan solos."
->
-  <div
+<Base title={title} ogTitle={ogTitle} description={description} image={image}>
+  <script is:inline slot="head" type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+  <main
     class="mx-auto grid max-w-[860px] gap-6 lg:max-w-[1120px] lg:grid-cols-[minmax(0,1fr)_21rem] lg:gap-x-7"
   >
     <Header />
-    <ItemsTable />
-    <Results />
+    <ItemsTable items={initial.items} pct={initial.pct} totals={totals} examples={initial.examples} />
+    <Results totals={totals} pct={initial.pct} />
     <History />
-  </div>
+  </main>
 </Base>
 
 <script>
@@ -36,6 +71,7 @@ import History from '../components/History.astro';
   } from '../lib/calc';
   import { loadHistory, loadState, saveHistory, saveState } from '../lib/storage';
   import { buildPdf, downloadPdf, loadJsPDF } from '../lib/pdf';
+  import { EMPTY_HISTORY, EMPTY_ROWS, EXAMPLES_NOTE, emptyState as emptyStateClass } from '../lib/ui';
 
   function byId<T extends HTMLElement = HTMLElement>(id: string): T {
     const el = document.getElementById(id);
@@ -54,7 +90,7 @@ import History from '../components/History.astro';
   }
   function emptyState(text: string): HTMLElement {
     const e = document.createElement('div');
-    e.className = 'rounded-tile bg-soft px-4 py-7 text-center text-muted';
+    e.className = emptyStateClass;
     e.textContent = text;
     return e;
   }
@@ -87,7 +123,7 @@ import History from '../components/History.astro';
     byId('gain').textContent = money(s.gain);
     byId('count').textContent = countLabel(s.active, s.count);
     byId('pctEcho').textContent = num(clampPct(state.pct));
-    noteEl.textContent = state.examples ? 'Las filas iniciales son ejemplos. Edítalas o vacía la lista.' : '';
+    noteEl.textContent = state.examples ? EXAMPLES_NOTE : '';
   }
 
   function edited() {
@@ -116,7 +152,7 @@ import History from '../components/History.astro';
   function render() {
     rowsEl.replaceChildren();
     outs = [];
-    if (!state.items.length) rowsEl.append(emptyState('Lista vacía. Usa "Agregar ítem" para empezar.'));
+    if (!state.items.length) rowsEl.append(emptyState(EMPTY_ROWS));
     state.items.forEach((it, i) => {
       const n = i + 1;
       const row = fromTemplate('row-tpl');
@@ -198,7 +234,7 @@ import History from '../components/History.astro';
   function renderHistory() {
     histEl.replaceChildren();
     if (!history.length) {
-      histEl.append(emptyState('Sin listas guardadas todavía.'));
+      histEl.append(emptyState(EMPTY_HISTORY));
       return;
     }
     history.forEach((h, i) => {
