@@ -1,0 +1,96 @@
+---
+// Escritorio: una fila por ítem en 7 columnas.
+// Móvil (< 680 px): casilla y nombre / precio unidad, cantidad y eliminar / precio total y con descuento.
+const grid =
+  'grid grid-cols-[1.5rem_minmax(0,1fr)_7.5rem_4.75rem_8rem_8rem_2.25rem] items-center gap-2.5 px-3.5 max-sm:grid-cols-[1.5rem_minmax(0,1fr)_minmax(0,1fr)_2.25rem] max-sm:items-end';
+const num = 'min-w-0 text-right max-sm:flex max-sm:flex-col max-sm:gap-0.5';
+const mlabel =
+  'hidden text-right text-[.68rem] font-semibold tracking-[.06em] text-muted uppercase max-sm:block';
+const out = 'tabular-nums wrap-anywhere';
+---
+
+<section class="sheet" aria-label="Ítems">
+  <div class:list={[grid, 'bg-page py-2 max-sm:hidden']}>
+    <span></span>
+    <span class="label">Ítem</span>
+    <span class="label text-right">Precio unidad</span>
+    <span class="label text-right">Cantidad</span>
+    <span class="label text-right">Precio total</span>
+    <span class="label text-right">Con descuento</span>
+    <span></span>
+  </div>
+  <div id="rows"></div>
+  <div class:list={[grid, 'bg-page py-2.5 font-semibold']}>
+    <span class="col-[1/5] max-sm:col-[1/-1]">Suma (<span id="count">0</span>)</span>
+    <span class:list={[num, 'max-sm:col-start-2']}>
+      <span class={mlabel}>Precio total</span><span class:list={[out, 'text-[1.02rem] font-semibold']} id="sumTotal">$0</span>
+    </span>
+    <span class:list={[num, 'max-sm:col-start-3']}>
+      <span class={mlabel}>Con descuento</span><span class:list={[out, 'text-[1.02rem] font-semibold']} id="sumDisc">$0</span>
+    </span>
+    <span></span>
+  </div>
+</section>
+
+<template id="row-tpl">
+  <div class:list={[grid, 'group py-2.5 not-first:border-t not-first:border-line']}>
+    <input
+      type="checkbox"
+      data-f="on"
+      class="m-0 size-[1.15rem] cursor-pointer p-0 accent-accent max-sm:col-start-1 max-sm:row-start-1 max-sm:self-center"
+      title="Tener en cuenta en las sumas"
+    />
+    <input
+      type="text"
+      data-f="name"
+      class="field group-data-off:text-muted max-sm:col-[2/-1] max-sm:row-start-1"
+      placeholder="Nombre del ítem"
+    />
+    <span class:list={[num, 'max-sm:col-start-2 max-sm:row-start-2']}>
+      <span class={mlabel}>Precio unidad</span><input
+        type="number"
+        data-f="price"
+        min="0"
+        step="any"
+        inputmode="decimal"
+        placeholder="0"
+        class="field text-right group-data-off:text-muted"
+      />
+    </span>
+    <span class:list={[num, 'max-sm:col-start-3 max-sm:row-start-2']}>
+      <span class={mlabel}>Cantidad</span><input
+        type="number"
+        data-f="qty"
+        min="0"
+        step="1"
+        inputmode="decimal"
+        placeholder="0"
+        class="field text-right group-data-off:text-muted"
+      />
+    </span>
+    <span class:list={[num, 'max-sm:col-start-2 max-sm:row-start-3']}>
+      <span class={mlabel}>Precio total</span><span
+        data-out="total"
+        class:list={[out, 'font-medium group-data-off:text-muted group-data-off:line-through']}></span>
+    </span>
+    <span class:list={[num, 'max-sm:col-start-3 max-sm:row-start-3']}>
+      <span class={mlabel}>Con descuento</span><span
+        data-out="disc"
+        class:list={[out, 'font-medium group-data-off:text-muted group-data-off:line-through']}></span>
+    </span>
+    <button
+      type="button"
+      data-f="del"
+      class="size-9 cursor-pointer rounded-md border border-transparent bg-transparent text-[1.1rem] leading-none text-muted hover:border-line hover:text-danger max-sm:col-start-4 max-sm:row-start-2"
+      >×</button
+    >
+  </div>
+</template>
+
+<div class="flex flex-wrap items-center gap-2.5">
+  <button class="btn" id="add" type="button">Agregar ítem</button>
+  <button class="btn btn-ghost" id="clear" type="button">Vaciar lista</button>
+  <button class="btn btn-ghost" id="pdf" type="button">Descargar PDF</button>
+  <p class="note" id="note"></p>
+</div>
+<p class="note" id="pdfNote" hidden></p>

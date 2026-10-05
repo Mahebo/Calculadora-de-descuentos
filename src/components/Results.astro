@@ -1,0 +1,32 @@
+<section class="flex flex-col gap-2.5" aria-live="polite">
+  <div
+    class="flex flex-wrap items-baseline justify-between gap-x-5 gap-y-2 rounded-[10px] bg-accent px-5 py-5.5 text-on-accent"
+  >
+    <div>
+      <span class="label text-[.8rem] text-on-accent opacity-85">Total a pagar</span>
+      <p class="mt-0.5 text-[.88rem] opacity-90">Suma con descuento de los ítems activos.</p>
+    </div>
+    <div
+      id="pay"
+      class="font-display text-[3rem] leading-[1.05] font-bold tabular-nums wrap-anywhere max-sm:text-[2.3rem]"
+    >
+      $0
+    </div>
+  </div>
+  <div
+    class="flex flex-wrap items-baseline justify-between gap-x-5 gap-y-2 rounded-[10px] border border-line bg-surface px-5 py-3.5"
+  >
+    <div>
+      <span class="label">Ganancia potencial</span>
+      <p class="mt-0.5 text-[.88rem] text-muted">
+        Suma de precio total menos total a pagar (<span id="pctEcho">43</span> % del total).
+      </p>
+    </div>
+    <div
+      id="gain"
+      class="font-display text-[1.6rem] leading-[1.1] font-semibold text-accent tabular-nums wrap-anywhere max-sm:text-[1.4rem]"
+    >
+      $0
+    </div>
+  </div>
+</section>

@@ -1,0 +1,25 @@
+<header class="flex flex-wrap items-end justify-between gap-4">
+  <div>
+    <h1 class="m-0 font-display text-[1.9rem] leading-[1.1] font-bold text-balance max-sm:text-[1.6rem]">
+      Calculadora de descuento
+    </h1>
+    <p class="mt-1 text-muted">
+      Agrega ítems con precio por unidad y cantidad. El total y el descuento se calculan solos.
+    </p>
+  </div>
+  <label class="flex flex-col gap-1" for="pct">
+    <span class="label">Descuento</span>
+    <span class="flex items-center gap-1.5">
+      <input
+        id="pct"
+        class="field w-20 text-right font-semibold"
+        type="number"
+        min="0"
+        max="100"
+        step="0.1"
+        value="43"
+        inputmode="decimal"
+      /><span>%</span>
+    </span>
+  </label>
+</header>
