@@ -1,8 +1,5 @@
 @import 'tailwindcss';
 
-/* El HTML original lleva jsPDF minificado: fuera del escaneo de clases. */
-@source not '../../referencia';
-
 /* Tokens de diseño. Solo existen estos colores: nada de colores sueltos. */
 @theme static {
   --color-*: initial;

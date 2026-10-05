@@ -17,5 +17,3 @@ pnpm test      # pruebas de cálculo con Vitest
 ```
 
 `pnpm build` genera un sitio estático en `dist/`, listo para cualquier hosting de archivos estáticos.
-
-La versión original en un solo archivo HTML está en `referencia/calculadora-descuento.html`.
