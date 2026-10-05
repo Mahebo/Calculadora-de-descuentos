@@ -1,0 +1,42 @@
+---
+// Mini banner de referido de Hostinger, con los tonos oscuros de sus tarjetas. rel="sponsored": es un enlace de afiliado.
+const REFERRAL_URL = 'https://www.hostinger.com?REFERRALCODE=Mahebo';
+---
+
+<a
+  href={REFERRAL_URL}
+  target="_blank"
+  rel="sponsored noopener noreferrer"
+  class="group block rounded-card bg-linear-to-br from-hostinger-night to-hostinger-deep p-5 text-on-accent shadow-card transition hover:shadow-hostinger motion-safe:hover:-translate-y-0.5"
+>
+  <span class="flex items-center justify-between gap-3">
+    <span class="flex items-center gap-2.5">
+      <span class="text-[1.6rem] leading-none" aria-hidden="true">🔥</span>
+      <span class="text-[2.6rem] leading-none font-bold tracking-[-0.03em] text-hostinger-lilac">20%</span>
+      <span class="text-[.72rem] leading-tight font-semibold tracking-[.08em] text-on-accent/75 uppercase">
+        <span class="block">extra en</span>
+        <span class="block">Hostinger</span>
+      </span>
+    </span>
+    <span
+      class="grid size-8 shrink-0 place-items-center rounded-full bg-on-accent/10 ring-1 ring-on-accent/20 transition group-hover:bg-on-accent group-hover:text-hostinger-night"
+      aria-hidden="true"
+    >
+      <svg
+        class="size-3.5 transition-transform group-hover:-rotate-45"
+        viewBox="0 0 16 16"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"></path></svg
+      >
+    </span>
+  </span>
+  <span class="mt-4 block leading-snug font-medium text-balance">
+    Obtén un descuento adicional en tu plan de hosting.
+  </span>
+  <span class="mt-1.5 block text-[.85rem] text-on-accent/80">
+    Entra desde aquí y el descuento de referido se aplicará automáticamente.
+  </span>
+</a>

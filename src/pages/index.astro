@@ -63,6 +63,7 @@ const jsonLd = {
     itemDiscounted,
     itemTotal,
     itemsLabel,
+    MAX_PCT,
     money,
     num,
     pdfFilename,
@@ -225,6 +226,9 @@ const jsonLd = {
     pctEl.select();
   });
   pctEl.addEventListener('input', () => {
+    // Fuera de 0–MAX_PCT el campo se corrige al instante para que muestre lo que se calcula.
+    const typed = parseFloat(pctEl.value);
+    if (typed > MAX_PCT || typed < 0) pctEl.value = String(clampPct(typed));
     state.pct = pctEl.value;
     save();
     totals();

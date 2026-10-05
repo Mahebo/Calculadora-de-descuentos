@@ -22,6 +22,10 @@
   --color-peach: #fde4de;
   --color-sun: #fdf0c8;
   --color-sun-ink: #8a6512;
+  /* Banner de referido: tonos oscuros de las tarjetas de Hostinger. */
+  --color-hostinger-deep: #2c1c64;
+  --color-hostinger-night: #13101d;
+  --color-hostinger-lilac: #b7aaff;
 
   --font-sans: 'Bricolage Grotesque Variable', 'Segoe UI', system-ui, sans-serif;
 
@@ -29,6 +33,7 @@
   --radius-tile: 1.25rem;
   --shadow-card: 0 30px 60px -36px rgb(70 62 170 / 0.35), 0 1px 3px rgb(70 62 170 / 0.06);
   --shadow-accent: 0 10px 24px -10px rgb(106 93 240 / 0.7);
+  --shadow-hostinger: 0 24px 48px -24px rgb(103 61 230 / 0.75);
 
   /* Toda transición (clases transition*) dura 300 ms con la curva ease-in-out de Tailwind. */
   --default-transition-duration: 300ms;

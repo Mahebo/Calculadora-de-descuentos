@@ -27,10 +27,13 @@ export function pos(v: unknown): number {
   return Number.isFinite(n) && n > 0 ? n : 0;
 }
 
-/** Descuento limitado a 0–100. */
+/** Descuento máximo: con 100 % o más no habría nada que pagar. */
+export const MAX_PCT = 99;
+
+/** Descuento limitado a 0–MAX_PCT. */
 export function clampPct(v: unknown): number {
   const p = parseFloat(String(v));
-  return Number.isFinite(p) ? Math.min(100, Math.max(0, p)) : 0;
+  return Number.isFinite(p) ? Math.min(MAX_PCT, Math.max(0, p)) : 0;
 }
 
 export function isActive(it: Item): boolean {

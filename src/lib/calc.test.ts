@@ -49,8 +49,10 @@ describe('entradas inválidas', () => {
     expect(pos('12.5')).toBe(12.5);
   });
 
-  it('el descuento se limita a 0–100', () => {
-    expect(clampPct(150)).toBe(100);
+  it('el descuento se limita a 0–99', () => {
+    expect(clampPct(100)).toBe(99);
+    expect(clampPct(150)).toBe(99);
+    expect(clampPct('99.5')).toBe(99);
     expect(clampPct(-3)).toBe(0);
     expect(clampPct('')).toBe(0);
     expect(clampPct('12.5')).toBe(12.5);
@@ -58,8 +60,8 @@ describe('entradas inválidas', () => {
 
   it('descuento fuera de rango no produce totales negativos', () => {
     const s = summarize([{ name: '', price: 100, qty: 1 }], 250);
-    expect(s.pay).toBe(0);
-    expect(s.gain).toBe(100);
+    expect(s.pay).toBeCloseTo(1);
+    expect(s.gain).toBeCloseTo(99);
   });
 });
 

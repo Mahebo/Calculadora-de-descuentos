@@ -1,5 +1,6 @@
 ---
 import Sparkle from './Sparkle.astro';
+import HostingerBanner from './HostingerBanner.astro';
 import { clampPct, money, num, type Totals } from '../lib/calc';
 
 /** Estado inicial, renderizado en el build. */
@@ -73,4 +74,6 @@ const { totals, pct } = Astro.props;
       >
     </a>
   </p>
+
+  <HostingerBanner />
 </section>

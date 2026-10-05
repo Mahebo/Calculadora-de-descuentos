@@ -1,5 +1,6 @@
 ---
 import Sparkle from './Sparkle.astro';
+import { MAX_PCT } from '../lib/calc';
 ---
 
 <header class="flex flex-wrap items-center justify-between gap-x-6 gap-y-5 lg:col-span-2">
@@ -13,7 +14,8 @@ import Sparkle from './Sparkle.astro';
         Calculadora de descuento
       </h1>
       <p class="mt-1.5 max-w-[36rem] text-balance text-muted">
-        Agrega ítems con precio por unidad y cantidad. El total y el descuento se calculan solos.
+        Establece el % de descuento, agrega ítems con precio por unidad y cantidad. El total, el descuento y la
+        ganancia potencial se calculan solos.
       </p>
     </div>
   </div>
@@ -25,7 +27,7 @@ import Sparkle from './Sparkle.astro';
         class="field w-16 rounded-full border-transparent bg-transparent pr-1 pl-2 text-right text-[1.15rem] font-bold hover:border-transparent focus-visible:outline-hidden"
         type="number"
         min="0"
-        max="100"
+        max={MAX_PCT}
         step="0.1"
         value="43"
         inputmode="decimal"
