@@ -10,7 +10,9 @@ import History from '../components/History.astro';
   title="Calculadora de descuento"
   description="Agrega ítems con precio por unidad y cantidad. El total y el descuento se calculan solos."
 >
-  <div class="mx-auto flex max-w-[860px] flex-col gap-5.5">
+  <div
+    class="mx-auto grid max-w-[860px] gap-6 lg:max-w-[1120px] lg:grid-cols-[minmax(0,1fr)_21rem] lg:gap-x-7"
+  >
     <Header />
     <ItemsTable />
     <Results />
@@ -52,7 +54,7 @@ import History from '../components/History.astro';
   }
   function emptyState(text: string): HTMLElement {
     const e = document.createElement('div');
-    e.className = 'px-3.5 py-5.5 text-center text-muted';
+    e.className = 'rounded-tile bg-soft px-4 py-7 text-center text-muted';
     e.textContent = text;
     return e;
   }
@@ -64,6 +66,7 @@ import History from '../components/History.astro';
   const histNote = byId('histNote');
   const histName = byId<HTMLInputElement>('histName');
   const pdfNote = byId('pdfNote');
+  const TONES = ['lavender', 'mint', 'peach', 'sun'];
   const HIST_HINT = 'Se guarda solo en este navegador. Cargar una lista reemplaza la actual.';
 
   const state = loadState();
@@ -171,6 +174,20 @@ import History from '../components/History.astro';
     save();
     render();
   });
+  // Al hacer clic o tabular al porcentaje queda todo seleccionado, listo para reemplazar.
+  // Con el ratón, el mousedown mueve el cursor después del foco: se vuelve a seleccionar en el
+  // mouseup y se cancela su acción por defecto para que no deshaga la selección (Safari).
+  let selectOnMouseUp = false;
+  pctEl.addEventListener('focus', () => {
+    pctEl.select();
+    selectOnMouseUp = true;
+  });
+  pctEl.addEventListener('mouseup', (ev) => {
+    if (!selectOnMouseUp) return;
+    selectOnMouseUp = false;
+    ev.preventDefault();
+    pctEl.select();
+  });
   pctEl.addEventListener('input', () => {
     state.pct = pctEl.value;
     save();
@@ -187,6 +204,7 @@ import History from '../components/History.astro';
     history.forEach((h, i) => {
       const s = summarize(h.items, h.pct);
       const entry = fromTemplate('hist-tpl');
+      part(entry, '[data-h="icon"]').dataset.tone = TONES[i % TONES.length];
       const when = new Date(h.at).toLocaleString('es-CO', { dateStyle: 'medium', timeStyle: 'short' });
       part(entry, '[data-h="name"]').textContent = h.name;
       part(entry, '[data-h="meta"]').textContent =

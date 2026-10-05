@@ -11,9 +11,6 @@ importers:
       '@fontsource-variable/bricolage-grotesque':
         specifier: ^5.3.0
         version: 5.3.0
-      '@fontsource/ibm-plex-sans':
-        specifier: ^5.3.0
-        version: 5.3.0
       astro:
         specifier: ^7.3.5
         version: 7.3.5(jiti@2.7.0)(yaml@2.9.1)
@@ -428,9 +425,6 @@ packages:
 
   '@fontsource-variable/bricolage-grotesque@5.3.0':
     resolution: {integrity: sha512-TLi9Q4hJjS2UvoTMRSS2nHu6c4R56lAw60NR9QYtVRCHn0XtsFpiEhNffZ8Glsoxu6wEEwLKBP8lb94J52PNBA==}
-
-  '@fontsource/ibm-plex-sans@5.3.0':
-    resolution: {integrity: sha512-CbE4CbbEEZJX860XyUiRpsksXIQR8Rp2XDva2VO53NJox9tVNtusrysd2x5YkUEY3ErQ66W1IiiQL8/wihhw5w==}
 
   '@img/colour@1.1.0':
     resolution: {integrity: sha512-Td76q7j57o/tLVdgS746cYARfSyxk8iEfRxewL9h4OMzYhbW4TAcppl0mT4eyqXddh6L/jwoM75mo7ixa/pCeQ==}
@@ -2434,8 +2428,6 @@ snapshots:
     optional: true
 
   '@fontsource-variable/bricolage-grotesque@5.3.0': {}
-
-  '@fontsource/ibm-plex-sans@5.3.0': {}
 
   '@img/colour@1.1.0':
     optional: true

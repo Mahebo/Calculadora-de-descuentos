@@ -1,96 +1,129 @@
 ---
-// Escritorio: una fila por ítem en 7 columnas.
+// Escritorio: una fila por ítem en 7 columnas (más estrechas entre 680 y 860 px).
 // Móvil (< 680 px): casilla y nombre / precio unidad, cantidad y eliminar / precio total y con descuento.
 const grid =
-  'grid grid-cols-[1.5rem_minmax(0,1fr)_7.5rem_4.75rem_8rem_8rem_2.25rem] items-center gap-2.5 px-3.5 max-sm:grid-cols-[1.5rem_minmax(0,1fr)_minmax(0,1fr)_2.25rem] max-sm:items-end';
+  'grid grid-cols-[1.375rem_minmax(0,1fr)_7rem_4.5rem_7rem_7rem_2.25rem] items-center gap-2.5 px-3.5 sm:max-[860px]:gap-2 sm:max-[860px]:grid-cols-[1.375rem_minmax(0,1fr)_6rem_3.75rem_6.25rem_6.25rem_2.25rem] max-sm:grid-cols-[1.375rem_minmax(0,1fr)_minmax(0,1fr)_2.25rem] max-sm:items-end';
 const num = 'min-w-0 text-right max-sm:flex max-sm:flex-col max-sm:gap-0.5';
-const mlabel =
-  'hidden text-right text-[.68rem] font-semibold tracking-[.06em] text-muted uppercase max-sm:block';
+// Etiqueta pequeña que solo aparece en móvil, encima de cada valor.
+const mlabelBase = 'hidden text-right text-[.68rem] font-semibold tracking-[.06em] uppercase max-sm:block';
+const mlabel = mlabelBase + ' text-muted';
 const out = 'tabular-nums wrap-anywhere';
 ---
 
-<section class="sheet" aria-label="Ítems">
-  <div class:list={[grid, 'bg-page py-2 max-sm:hidden']}>
-    <span></span>
-    <span class="label">Ítem</span>
-    <span class="label text-right">Precio unidad</span>
-    <span class="label text-right">Cantidad</span>
-    <span class="label text-right">Precio total</span>
-    <span class="label text-right">Con descuento</span>
-    <span></span>
-  </div>
-  <div id="rows"></div>
-  <div class:list={[grid, 'bg-page py-2.5 font-semibold']}>
-    <span class="col-[1/5] max-sm:col-[1/-1]">Suma (<span id="count">0</span>)</span>
-    <span class:list={[num, 'max-sm:col-start-2']}>
-      <span class={mlabel}>Precio total</span><span class:list={[out, 'text-[1.02rem] font-semibold']} id="sumTotal">$0</span>
-    </span>
-    <span class:list={[num, 'max-sm:col-start-3']}>
-      <span class={mlabel}>Con descuento</span><span class:list={[out, 'text-[1.02rem] font-semibold']} id="sumDisc">$0</span>
-    </span>
-    <span></span>
-  </div>
-</section>
+<div class="flex min-w-0 flex-col gap-4 lg:col-start-1">
+  <section class="card p-2 sm:p-3" aria-label="Ítems">
+    <header class="px-3.5 pt-2.5 pb-2">
+      <h2 class="m-0 text-[1.2rem] font-semibold">Ítems</h2>
+    </header>
+    <div class:list={[grid, 'py-2 max-sm:hidden']}>
+      <span></span>
+      <span class="label">Ítem</span>
+      <span class="label text-right">Precio unidad</span>
+      <span class="label text-right">Cantidad</span>
+      <span class="label text-right">Precio total</span>
+      <span class="label text-right">Con descuento</span>
+      <span></span>
+    </div>
+    <div id="rows" class="flex flex-col gap-2"></div>
+    <div class:list={[grid, 'mt-2 rounded-tile bg-lavender py-3.5 font-semibold']}>
+      <span class="col-[1/5] max-sm:col-span-full">Suma (<span id="count">0</span>)</span>
+      <span class:list={[num, 'max-sm:col-start-2']}>
+        <span class:list={[mlabelBase, 'text-ink/70']}>Precio total</span><span class:list={[out, 'text-[1.05rem] font-bold']} id="sumTotal"
+          >$0</span
+        >
+      </span>
+      <span class:list={[num, 'max-sm:col-start-3']}>
+        <span class:list={[mlabelBase, 'text-ink/70']}>Con descuento</span><span class:list={[out, 'text-[1.05rem] font-bold']} id="sumDisc"
+          >$0</span
+        >
+      </span>
+      <span></span>
+    </div>
+  </section>
 
-<template id="row-tpl">
-  <div class:list={[grid, 'group py-2.5 not-first:border-t not-first:border-line']}>
-    <input
-      type="checkbox"
-      data-f="on"
-      class="m-0 size-[1.15rem] cursor-pointer p-0 accent-accent max-sm:col-start-1 max-sm:row-start-1 max-sm:self-center"
-      title="Tener en cuenta en las sumas"
-    />
-    <input
-      type="text"
-      data-f="name"
-      class="field group-data-off:text-muted max-sm:col-[2/-1] max-sm:row-start-1"
-      placeholder="Nombre del ítem"
-    />
-    <span class:list={[num, 'max-sm:col-start-2 max-sm:row-start-2']}>
-      <span class={mlabel}>Precio unidad</span><input
-        type="number"
-        data-f="price"
-        min="0"
-        step="any"
-        inputmode="decimal"
-        placeholder="0"
-        class="field text-right group-data-off:text-muted"
+  <template id="row-tpl">
+    <div class:list={[grid, 'group rounded-tile bg-soft py-2.5']}>
+      <input
+        type="checkbox"
+        data-f="on"
+        class="check max-sm:col-start-1 max-sm:row-start-1 max-sm:self-center"
+        title="Tener en cuenta en las sumas"
       />
-    </span>
-    <span class:list={[num, 'max-sm:col-start-3 max-sm:row-start-2']}>
-      <span class={mlabel}>Cantidad</span><input
-        type="number"
-        data-f="qty"
-        min="0"
-        step="1"
-        inputmode="decimal"
-        placeholder="0"
-        class="field text-right group-data-off:text-muted"
+      <input
+        type="text"
+        data-f="name"
+        class="field group-data-off:text-muted max-sm:col-[2/-1] max-sm:row-start-1"
+        placeholder="Nombre del ítem"
       />
-    </span>
-    <span class:list={[num, 'max-sm:col-start-2 max-sm:row-start-3']}>
-      <span class={mlabel}>Precio total</span><span
-        data-out="total"
-        class:list={[out, 'font-medium group-data-off:text-muted group-data-off:line-through']}></span>
-    </span>
-    <span class:list={[num, 'max-sm:col-start-3 max-sm:row-start-3']}>
-      <span class={mlabel}>Con descuento</span><span
-        data-out="disc"
-        class:list={[out, 'font-medium group-data-off:text-muted group-data-off:line-through']}></span>
-    </span>
-    <button
-      type="button"
-      data-f="del"
-      class="size-9 cursor-pointer rounded-md border border-transparent bg-transparent text-[1.1rem] leading-none text-muted hover:border-line hover:text-danger max-sm:col-start-4 max-sm:row-start-2"
-      >×</button
-    >
-  </div>
-</template>
+      <span class:list={[num, 'max-sm:col-start-2 max-sm:row-start-2']}>
+        <span class={mlabel}>Precio unidad</span><input
+          type="number"
+          data-f="price"
+          min="0"
+          step="any"
+          inputmode="decimal"
+          placeholder="0"
+          class="field text-right group-data-off:text-muted"
+        />
+      </span>
+      <span class:list={[num, 'max-sm:col-start-3 max-sm:row-start-2']}>
+        <span class={mlabel}>Cantidad</span><input
+          type="number"
+          data-f="qty"
+          min="0"
+          step="1"
+          inputmode="decimal"
+          placeholder="0"
+          class="field text-right group-data-off:text-muted"
+        />
+      </span>
+      <span class:list={[num, 'max-sm:col-start-2 max-sm:row-start-3']}>
+        <span class={mlabel}>Precio total</span><span
+          data-out="total"
+          class:list={[out, 'font-medium group-data-off:text-muted group-data-off:line-through']}></span>
+      </span>
+      <span class:list={[num, 'max-sm:col-start-3 max-sm:row-start-3']}>
+        <span class={mlabel}>Con descuento</span><span
+          data-out="disc"
+          class:list={[out, 'font-semibold group-data-off:text-muted group-data-off:line-through']}></span>
+      </span>
+      <button
+        type="button"
+        data-f="del"
+        class="grid size-9 cursor-pointer place-items-center rounded-full text-[1.2rem] leading-none text-muted transition-colors hover:bg-peach hover:text-danger max-sm:col-start-4 max-sm:row-start-2"
+        >×</button
+      >
+    </div>
+  </template>
 
-<div class="flex flex-wrap items-center gap-2.5">
-  <button class="btn" id="add" type="button">Agregar ítem</button>
-  <button class="btn btn-ghost" id="clear" type="button">Vaciar lista</button>
-  <button class="btn btn-ghost" id="pdf" type="button">Descargar PDF</button>
-  <p class="note" id="note"></p>
+  <div class="flex flex-wrap items-center gap-2.5 max-sm:grid max-sm:grid-cols-2">
+    <button class="btn btn-accent max-sm:col-span-2" id="add" type="button">
+      <svg
+        class="size-4"
+        viewBox="0 0 16 16"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2.2"
+        stroke-linecap="round"
+        aria-hidden="true"><path d="M8 3v10M3 8h10"></path></svg
+      >
+      Agregar ítem
+    </button>
+    <button class="btn btn-ghost" id="clear" type="button">Vaciar lista</button>
+    <button class="btn btn-dark" id="pdf" type="button">
+      Descargar PDF
+      <svg
+        class="size-4"
+        viewBox="0 0 16 16"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"></path></svg
+      >
+    </button>
+    <p class="note max-sm:col-span-2" id="note"></p>
+  </div>
+  <p class="note -mt-1" id="pdfNote" hidden></p>
 </div>
-<p class="note" id="pdfNote" hidden></p>

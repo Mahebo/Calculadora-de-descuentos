@@ -1,32 +1,67 @@
-<section class="flex flex-col gap-2.5" aria-live="polite">
-  <div
-    class="flex flex-wrap items-baseline justify-between gap-x-5 gap-y-2 rounded-[10px] bg-accent px-5 py-5.5 text-on-accent"
-  >
-    <div>
-      <span class="label text-[.8rem] text-on-accent opacity-85">Total a pagar</span>
-      <p class="mt-0.5 text-[.88rem] opacity-90">Suma con descuento de los ítems activos.</p>
-    </div>
+---
+import Sparkle from './Sparkle.astro';
+---
+
+<section class="flex flex-col gap-4 lg:sticky lg:top-6 lg:col-start-2 lg:row-span-2 lg:row-start-2 lg:self-start">
+  <div class="flex flex-col gap-4" aria-live="polite">
     <div
-      id="pay"
-      class="font-display text-[3rem] leading-[1.05] font-bold tabular-nums wrap-anywhere max-sm:text-[2.3rem]"
+      class="relative overflow-hidden rounded-card bg-linear-to-br from-lavender-strong via-lavender to-sky p-6 shadow-card sm:p-7"
     >
-      $0
+      <Sparkle id="pay-sparkle" class="pointer-events-none absolute -top-3 -right-3 size-28 opacity-25" />
+      <Sparkle id="pay-sparkle-small" class="pointer-events-none absolute top-29 right-7 size-4 opacity-40" />
+      <span class="label relative text-ink/70">Total a pagar</span>
+      <div
+        id="pay"
+        class="relative mt-3 text-[3rem] leading-none font-bold tracking-[-0.02em] tabular-nums wrap-anywhere max-sm:text-[2.4rem]"
+      >
+        $0
+      </div>
+      <p class="relative mt-3 text-[.9rem] text-ink/75">Suma con descuento de los ítems activos.</p>
     </div>
-  </div>
-  <div
-    class="flex flex-wrap items-baseline justify-between gap-x-5 gap-y-2 rounded-[10px] border border-line bg-surface px-5 py-3.5"
-  >
-    <div>
-      <span class="label">Ganancia potencial</span>
-      <p class="mt-0.5 text-[.88rem] text-muted">
+    <div class="rounded-card bg-mint p-6 shadow-card sm:p-7">
+      <span class="label text-mint-ink">Ganancia potencial</span>
+      <div
+        id="gain"
+        class="mt-2.5 text-[1.9rem] leading-none font-bold tracking-[-0.01em] text-mint-ink tabular-nums wrap-anywhere max-sm:text-[1.6rem]"
+      >
+        $0
+      </div>
+      <p class="mt-3 text-[.9rem] text-ink/75">
         Suma de precio total menos total a pagar (<span id="pctEcho">43</span> % del total).
       </p>
     </div>
-    <div
-      id="gain"
-      class="font-display text-[1.6rem] leading-[1.1] font-semibold text-accent tabular-nums wrap-anywhere max-sm:text-[1.4rem]"
-    >
-      $0
-    </div>
   </div>
+
+  <p class="m-0 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-[.8rem] text-muted">
+    <span>
+      Made with <svg
+        class="inline-block size-[1.05em] align-[-0.17em]"
+        viewBox="0 0 24 24"
+        fill="currentColor"
+        aria-hidden="true"
+        focusable="false"
+        ><path
+          d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 01-.383-.218 25.18 25.18 0 01-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0112 5.052 5.5 5.5 0 0116.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 01-4.244 3.17 15.247 15.247 0 01-.383.219l-.022.012-.007.004-.003.001a.752.752 0 01-.704 0l-.003-.001z"
+        ></path></svg
+      ><span class="sr-only">love</span> by <a
+        href="mailto:hello@mahebo.com"
+        class="rounded-sm font-semibold text-ink underline decoration-accent decoration-2 underline-offset-3 transition-colors hover:text-accent"
+        >Mahebo™</a
+      >
+    </span>
+    <a
+      href="https://github.com/Maurohebo"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="grid size-7 place-items-center rounded-full text-muted transition-colors hover:bg-surface hover:text-ink"
+      aria-label="Mahebo en GitHub"
+      title="Mahebo en GitHub"
+    >
+      <svg class="size-4" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true" focusable="false"
+        ><path
+          d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"
+        ></path></svg
+      >
+    </a>
+  </p>
 </section>

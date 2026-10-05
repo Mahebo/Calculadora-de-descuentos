@@ -1,30 +1,37 @@
-<section class="flex flex-col gap-3" aria-label="Historial">
-  <h2 class="m-0 font-display text-[1.25rem] font-semibold">Historial</h2>
-  <div class="flex flex-wrap gap-2.5">
+<section class="card flex flex-col gap-4 p-5 sm:p-6 lg:col-start-1" aria-label="Historial">
+  <h2 class="m-0 text-[1.2rem] font-semibold">Historial</h2>
+  <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:rounded-full sm:bg-soft sm:p-1.5 sm:pl-2">
     <input
       id="histName"
-      class="field flex-[1_1_14rem]"
+      class="field rounded-full px-4 py-2.5 sm:border-transparent sm:bg-transparent sm:hover:border-transparent"
       type="text"
       placeholder="Nombre para esta lista (opcional)"
       aria-label="Nombre para guardar esta lista"
     />
-    <button class="btn" id="histSave" type="button">Guardar en historial</button>
+    <button class="btn btn-accent shrink-0" id="histSave" type="button">
+      Guardar en historial
+      <svg class="size-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"></path></svg>
+    </button>
   </div>
-  <p class="note" id="histNote">Se guarda solo en este navegador. Cargar una lista reemplaza la actual.</p>
-  <div class="sheet flex flex-col" id="histList"></div>
+  <p class="note px-1" id="histNote">Se guarda solo en este navegador. Cargar una lista reemplaza la actual.</p>
+  <div class="flex flex-col gap-2" id="histList"></div>
 </section>
 
 <template id="hist-tpl">
-  <div
-    class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 px-3.5 py-3 not-first:border-t not-first:border-line"
-  >
-    <div class="min-w-0 flex-[1_1_16rem]">
+  <div class="flex flex-wrap items-center gap-x-4 gap-y-3 rounded-tile bg-soft p-3 pr-4">
+    <span
+      data-h="icon"
+      class="grid size-11 shrink-0 place-items-center rounded-full bg-lavender text-accent data-[tone=mint]:bg-mint data-[tone=mint]:text-mint-ink data-[tone=peach]:bg-peach data-[tone=peach]:text-danger data-[tone=sun]:bg-sun data-[tone=sun]:text-sun-ink"
+    >
+      <svg class="size-5" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 2.75h6.5L15 6.25v11H5z"></path><path d="M11.5 2.75v3.5H15M7.75 10.5h4.5M7.75 13.5h4.5"></path></svg>
+    </span>
+    <div class="min-w-0 flex-[1_1_14rem]">
       <div data-h="name" class="font-semibold wrap-anywhere"></div>
       <div data-h="meta" class="text-[.85rem] text-muted tabular-nums"></div>
     </div>
-    <div class="flex gap-2">
+    <div class="flex gap-2 max-sm:w-full max-sm:pl-15">
       <button type="button" data-h="load" class="btn btn-ghost btn-small">Cargar</button>
-      <button type="button" data-h="del" class="btn btn-ghost btn-small">Eliminar</button>
+      <button type="button" data-h="del" class="btn btn-ghost btn-small hover:text-danger">Eliminar</button>
     </div>
   </div>
 </template>

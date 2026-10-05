@@ -1,25 +1,35 @@
-<header class="flex flex-wrap items-end justify-between gap-4">
-  <div>
-    <h1 class="m-0 font-display text-[1.9rem] leading-[1.1] font-bold text-balance max-sm:text-[1.6rem]">
-      Calculadora de descuento
-    </h1>
-    <p class="mt-1 text-muted">
-      Agrega ítems con precio por unidad y cantidad. El total y el descuento se calculan solos.
-    </p>
+---
+import Sparkle from './Sparkle.astro';
+---
+
+<header class="flex flex-wrap items-center justify-between gap-x-6 gap-y-5 lg:col-span-2">
+  <div class="flex min-w-0 items-center gap-4">
+    <span class="card relative grid size-14 shrink-0 place-items-center rounded-2xl max-sm:size-12">
+      <Sparkle id="logo-sparkle" class="size-8 max-sm:size-7" />
+      <Sparkle id="logo-sparkle-small" class="absolute top-1.5 right-1.5 size-2.5 opacity-70" />
+    </span>
+    <div class="min-w-0">
+      <h1 class="m-0 text-[2.1rem] leading-[1.05] font-bold tracking-[-0.02em] text-balance max-sm:text-[1.65rem]">
+        Calculadora de descuento
+      </h1>
+      <p class="mt-1.5 max-w-[36rem] text-balance text-muted">
+        Agrega ítems con precio por unidad y cantidad. El total y el descuento se calculan solos.
+      </p>
+    </div>
   </div>
-  <label class="flex flex-col gap-1" for="pct">
+  <label class="card flex items-center gap-3 rounded-full py-2 pr-2 pl-5" for="pct">
     <span class="label">Descuento</span>
-    <span class="flex items-center gap-1.5">
+    <span class="flex items-center gap-1 rounded-full bg-peach pr-4">
       <input
         id="pct"
-        class="field w-20 text-right font-semibold"
+        class="field w-16 rounded-full border-transparent bg-transparent pr-1 pl-2 text-right text-[1.15rem] font-bold hover:border-transparent focus-visible:outline-hidden"
         type="number"
         min="0"
         max="100"
         step="0.1"
         value="43"
         inputmode="decimal"
-      /><span>%</span>
+      /><span class="text-[1.15rem] font-bold">%</span>
     </span>
   </label>
 </header>

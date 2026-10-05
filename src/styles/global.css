@@ -3,41 +3,75 @@
 /* Tokens de diseño. Solo existen estos colores: nada de colores sueltos. */
 @theme static {
   --color-*: initial;
-  --color-page: #f2f6f4;
+  --color-page: #eef0fa;
   --color-surface: #ffffff;
-  --color-ink: #15211d;
-  --color-muted: #5a6a64;
-  --color-line: #d3dcd8;
-  --color-accent: #0b6b57;
+  --color-soft: #f5f6fb;
+  --color-ink: #1f2233;
+  --color-muted: #5d6276;
+  --color-line: #e5e7f2;
+  --color-accent: #6a5df0;
   --color-on-accent: #ffffff;
-  --color-danger: #b3372b;
+  --color-navy: #222536;
+  --color-danger: #c2412f;
+  /* Pasteles de tarjetas y acentos. */
+  --color-lavender: #e4e2fd;
+  --color-lavender-strong: #c9c2fb;
+  --color-sky: #d8e3fd;
+  --color-mint: #daf4ea;
+  --color-mint-ink: #12775b;
+  --color-peach: #fde4de;
+  --color-sun: #fdf0c8;
+  --color-sun-ink: #8a6512;
 
-  --font-sans: 'IBM Plex Sans', 'Segoe UI', system-ui, sans-serif;
-  --font-display: 'Bricolage Grotesque Variable', 'Segoe UI', system-ui, sans-serif;
+  --font-sans: 'Bricolage Grotesque Variable', 'Segoe UI', system-ui, sans-serif;
 
-  /* Un solo corte: por debajo de 680 px la tabla se apila (max-sm:). */
+  --radius-card: 1.75rem;
+  --radius-tile: 1.25rem;
+  --shadow-card: 0 30px 60px -36px rgb(70 62 170 / 0.35), 0 1px 3px rgb(70 62 170 / 0.06);
+  --shadow-accent: 0 10px 24px -10px rgb(106 93 240 / 0.7);
+
+  /* Toda transición (clases transition*) dura 300 ms con la curva ease-in-out de Tailwind. */
+  --default-transition-duration: 300ms;
+  --default-transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* sm: por debajo de 680 px la tabla se apila. lg: dos columnas. */
   --breakpoint-*: initial;
   --breakpoint-sm: 680px;
+  --breakpoint-lg: 1180px;
 }
 
 @layer base {
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --color-page: #0f1513;
-      --color-surface: #171f1c;
-      --color-ink: #e6eeea;
-      --color-muted: #93a29c;
-      --color-line: #2b3632;
-      --color-accent: #4ccfae;
-      --color-on-accent: #06211a;
-      --color-danger: #f0867b;
-      color-scheme: dark;
-    }
+  :root {
+    color-scheme: light;
+  }
+
+  body {
+    background-color: var(--color-page);
+    background-image:
+      radial-gradient(44rem 34rem at -10% -12%, color-mix(in oklab, var(--color-lavender-strong) 70%, transparent), transparent 70%),
+      radial-gradient(38rem 30rem at 110% -6%, var(--color-mint), transparent 70%),
+      radial-gradient(52rem 38rem at 50% 115%, var(--color-sky), transparent 70%);
+    background-attachment: fixed;
+  }
+
+  ::selection {
+    background-color: var(--color-accent);
+    color: var(--color-on-accent);
   }
 
   :where(input, button, a):focus-visible {
     outline: 2px solid var(--color-accent);
     outline-offset: 2px;
+  }
+
+  /* Sin flechas en los campos numéricos: se editan con teclado. */
+  input[type='number'] {
+    appearance: textfield;
+  }
+  input[type='number']::-webkit-inner-spin-button,
+  input[type='number']::-webkit-outer-spin-button {
+    appearance: none;
+    margin: 0;
   }
 }
 
@@ -45,22 +79,52 @@
   .label {
     @apply text-[.72rem] font-semibold tracking-[.07em] text-muted uppercase;
   }
+  .card {
+    @apply rounded-card border border-surface/70 bg-surface/85 shadow-card backdrop-blur-xl;
+  }
   .field {
-    @apply w-full min-w-0 rounded-md border border-line bg-surface px-2.5 py-2 text-ink tabular-nums;
+    @apply w-full min-w-0 rounded-xl border border-line bg-surface px-3 py-2 text-ink tabular-nums transition-colors placeholder:text-muted hover:border-lavender-strong;
   }
   .btn {
-    @apply cursor-pointer rounded-md border border-accent bg-accent px-3.5 py-2.25 font-semibold text-on-accent;
+    @apply inline-flex cursor-pointer items-center justify-center gap-2 rounded-full border border-transparent px-5 py-2.5 font-semibold whitespace-nowrap transition;
+  }
+  .btn-accent {
+    @apply bg-accent text-on-accent shadow-accent hover:brightness-110;
+  }
+  .btn-dark {
+    @apply bg-navy text-on-accent hover:bg-ink;
   }
   .btn-ghost {
-    @apply border-line bg-transparent text-ink;
+    @apply border-line bg-surface text-ink hover:border-lavender-strong hover:bg-lavender/40;
   }
   .btn-small {
-    @apply px-2.5 py-1.5 text-[.88rem];
+    @apply px-3.5 py-1.5 text-[.85rem];
   }
   .note {
     @apply m-0 text-[.85rem] text-muted;
   }
-  .sheet {
-    @apply overflow-hidden rounded-[10px] border border-line bg-surface;
+
+  /* Casilla circular: borde lavanda; marcada, fondo oscuro con visto blanco. */
+  .check {
+    appearance: none;
+    flex: none;
+    width: 1.375rem;
+    height: 1.375rem;
+    margin: 0;
+    border-radius: 9999px;
+    border: 1.5px solid var(--color-lavender-strong);
+    background: var(--color-surface) center / 0.8rem no-repeat;
+    cursor: pointer;
+    transition-property: background-color, border-color;
+    transition-duration: var(--default-transition-duration);
+    transition-timing-function: var(--default-transition-timing-function);
+  }
+  .check:hover {
+    border-color: var(--color-accent);
+  }
+  .check:checked {
+    border-color: var(--color-navy);
+    background-color: var(--color-navy);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='white' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3.5 8.5l3 3 6-7'/%3E%3C/svg%3E");
   }
 }
