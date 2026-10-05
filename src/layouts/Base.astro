@@ -1,6 +1,7 @@
 ---
 import '@fontsource-variable/bricolage-grotesque/opsz.css';
 import '../styles/global.css';
+import { UMAMI_WEBSITE_ID } from '../lib/analytics';
 
 interface Props {
   /** <title> y título de buscadores. */
@@ -54,6 +55,18 @@ const imageUrl = new URL(image.src, Astro.site).href;
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={imageUrl} />
     <meta name="twitter:image:alt" content={image.alt} />
+
+    {
+      import.meta.env.PROD && (
+        <script
+          is:inline
+          defer
+          src="https://cloud.umami.is/script.js"
+          data-website-id={UMAMI_WEBSITE_ID}
+          data-domains={Astro.site.hostname}
+        />
+      )
+    }
 
     <slot name="head" />
   </head>

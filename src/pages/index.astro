@@ -73,6 +73,7 @@ const jsonLd = {
   import { loadHistory, loadState, saveHistory, saveState } from '../lib/storage';
   import { buildPdf, downloadPdf, loadJsPDF } from '../lib/pdf';
   import { EMPTY_HISTORY, EMPTY_ROWS, EXAMPLES_NOTE, emptyState as emptyStateClass } from '../lib/ui';
+  import { track, trackFirstUse } from '../lib/analytics';
 
   function byId<T extends HTMLElement = HTMLElement>(id: string): T {
     const el = document.getElementById(id);
@@ -110,7 +111,11 @@ const jsonLd = {
   const history = loadHistory();
   let outs: { total: HTMLElement; disc: HTMLElement }[] = [];
 
-  const save = () => saveState(state);
+  // Solo se llama tras una acción de la persona, así que también marca el primer uso.
+  function save() {
+    saveState(state);
+    trackFirstUse();
+  }
 
   function totals() {
     const s = summarize(state.items, state.pct);
@@ -291,6 +296,7 @@ const jsonLd = {
     const name = histName.value.trim() || 'Lista del ' + now.toLocaleDateString('es-CO', { dateStyle: 'medium' });
     history.unshift({ name, at: now.getTime(), pct: clampPct(state.pct), items: structuredClone(state.items) });
     if (saveHistory(history)) {
+      track('Guardó en historial');
       histNote.textContent = 'Guardada: ' + name + '.';
       histName.value = '';
     } else {
@@ -328,8 +334,10 @@ const jsonLd = {
       say('No se pudo generar el PDF.');
       return;
     }
+    const sent = downloadPdf(pdfFilename(title, now), data);
+    if (sent) track('Descargó PDF');
     say(
-      downloadPdf(pdfFilename(title, now), data)
+      sent
         ? 'Descarga enviada al navegador. Si no aparece el archivo, esta vista bloquea descargas.'
         : 'Esta vista bloquea la descarga de archivos.',
     );
