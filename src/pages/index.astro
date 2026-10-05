@@ -1,0 +1,283 @@
+---
+import Base from '../layouts/Base.astro';
+import Header from '../components/Header.astro';
+import ItemsTable from '../components/ItemsTable.astro';
+import Results from '../components/Results.astro';
+import History from '../components/History.astro';
+---
+
+<Base
+  title="Calculadora de descuento"
+  description="Agrega ítems con precio por unidad y cantidad. El total y el descuento se calculan solos."
+>
+  <div class="mx-auto flex max-w-[860px] flex-col gap-5.5">
+    <Header />
+    <ItemsTable />
+    <Results />
+    <History />
+  </div>
+</Base>
+
+<script>
+  import {
+    clampPct,
+    countLabel,
+    isActive,
+    itemDiscounted,
+    itemTotal,
+    itemsLabel,
+    money,
+    num,
+    pdfFilename,
+    summarize,
+    type Item,
+  } from '../lib/calc';
+  import { loadHistory, loadState, saveHistory, saveState } from '../lib/storage';
+  import { buildPdf, downloadPdf, loadJsPDF } from '../lib/pdf';
+
+  function byId<T extends HTMLElement = HTMLElement>(id: string): T {
+    const el = document.getElementById(id);
+    if (!el) throw new Error('Falta #' + id);
+    return el as T;
+  }
+  function part<T extends HTMLElement = HTMLElement>(root: ParentNode, selector: string): T {
+    const el = root.querySelector(selector);
+    if (!el) throw new Error('Falta ' + selector);
+    return el as T;
+  }
+  function fromTemplate(id: string): HTMLElement {
+    const el = byId<HTMLTemplateElement>(id).content.firstElementChild;
+    if (!el) throw new Error('Plantilla vacía #' + id);
+    return el.cloneNode(true) as HTMLElement;
+  }
+  function emptyState(text: string): HTMLElement {
+    const e = document.createElement('div');
+    e.className = 'px-3.5 py-5.5 text-center text-muted';
+    e.textContent = text;
+    return e;
+  }
+
+  const rowsEl = byId('rows');
+  const pctEl = byId<HTMLInputElement>('pct');
+  const noteEl = byId('note');
+  const histEl = byId('histList');
+  const histNote = byId('histNote');
+  const histName = byId<HTMLInputElement>('histName');
+  const pdfNote = byId('pdfNote');
+  const HIST_HINT = 'Se guarda solo en este navegador. Cargar una lista reemplaza la actual.';
+
+  const state = loadState();
+  const history = loadHistory();
+  let outs: { total: HTMLElement; disc: HTMLElement }[] = [];
+
+  const save = () => saveState(state);
+
+  function totals() {
+    const s = summarize(state.items, state.pct);
+    state.items.forEach((it, i) => {
+      outs[i].total.textContent = money(itemTotal(it));
+      outs[i].disc.textContent = money(itemDiscounted(it, state.pct));
+    });
+    byId('sumTotal').textContent = money(s.total);
+    byId('sumDisc').textContent = money(s.pay);
+    byId('pay').textContent = money(s.pay);
+    byId('gain').textContent = money(s.gain);
+    byId('count').textContent = countLabel(s.active, s.count);
+    byId('pctEcho').textContent = num(clampPct(state.pct));
+    noteEl.textContent = state.examples ? 'Las filas iniciales son ejemplos. Edítalas o vacía la lista.' : '';
+  }
+
+  function edited() {
+    state.examples = false;
+    save();
+    totals();
+  }
+
+  function numInput(row: HTMLElement, field: 'price' | 'qty', it: Item, i: number, label: string) {
+    const el = part<HTMLInputElement>(row, `[data-f="${field}"]`);
+    el.id = field + '-' + i;
+    el.value = it[field] === '' || it[field] == null ? '' : String(it[field]);
+    el.setAttribute('aria-label', label);
+    el.addEventListener('input', () => {
+      it[field] = el.value;
+      edited();
+    });
+    el.addEventListener('keydown', (ev) => {
+      if (ev.key === 'Enter') {
+        ev.preventDefault();
+        add();
+      }
+    });
+  }
+
+  function render() {
+    rowsEl.replaceChildren();
+    outs = [];
+    if (!state.items.length) rowsEl.append(emptyState('Lista vacía. Usa "Agregar ítem" para empezar.'));
+    state.items.forEach((it, i) => {
+      const n = i + 1;
+      const row = fromTemplate('row-tpl');
+      row.toggleAttribute('data-off', !isActive(it));
+
+      const tog = part<HTMLInputElement>(row, '[data-f="on"]');
+      tog.id = 'on-' + i;
+      tog.checked = isActive(it);
+      tog.setAttribute('aria-label', 'Tener en cuenta el ítem ' + n);
+      tog.addEventListener('change', () => {
+        it.on = tog.checked;
+        row.toggleAttribute('data-off', !tog.checked);
+        edited();
+      });
+
+      const name = part<HTMLInputElement>(row, '[data-f="name"]');
+      name.id = 'name-' + i;
+      name.value = it.name || '';
+      name.setAttribute('aria-label', 'Nombre del ítem ' + n);
+      name.addEventListener('input', () => {
+        it.name = name.value;
+        edited();
+      });
+
+      numInput(row, 'price', it, i, 'Precio por unidad del ítem ' + n);
+      numInput(row, 'qty', it, i, 'Cantidad del ítem ' + n);
+
+      const del = part(row, '[data-f="del"]');
+      del.setAttribute('aria-label', 'Eliminar ítem ' + n);
+      del.addEventListener('click', () => {
+        state.items.splice(i, 1);
+        state.examples = false;
+        save();
+        render();
+      });
+
+      outs.push({ total: part(row, '[data-out="total"]'), disc: part(row, '[data-out="disc"]') });
+      rowsEl.append(row);
+    });
+    totals();
+  }
+
+  function add() {
+    state.items.push({ name: '', price: '', qty: 1 });
+    state.examples = false;
+    save();
+    render();
+    document.getElementById('name-' + (state.items.length - 1))?.focus();
+  }
+
+  byId('add').addEventListener('click', add);
+  byId('clear').addEventListener('click', () => {
+    state.items = [];
+    state.examples = false;
+    save();
+    render();
+  });
+  pctEl.addEventListener('input', () => {
+    state.pct = pctEl.value;
+    save();
+    totals();
+  });
+
+  // Historial
+  function renderHistory() {
+    histEl.replaceChildren();
+    if (!history.length) {
+      histEl.append(emptyState('Sin listas guardadas todavía.'));
+      return;
+    }
+    history.forEach((h, i) => {
+      const s = summarize(h.items, h.pct);
+      const entry = fromTemplate('hist-tpl');
+      const when = new Date(h.at).toLocaleString('es-CO', { dateStyle: 'medium', timeStyle: 'short' });
+      part(entry, '[data-h="name"]').textContent = h.name;
+      part(entry, '[data-h="meta"]').textContent =
+        when +
+        ' · ' +
+        itemsLabel(h.items.length) +
+        ' · Total ' +
+        money(s.total) +
+        ' · A pagar (−' +
+        num(h.pct) +
+        ' %) ' +
+        money(s.pay) +
+        ' · Ganancia ' +
+        money(s.gain);
+
+      part(entry, '[data-h="load"]').addEventListener('click', () => {
+        state.items = structuredClone(h.items);
+        state.pct = h.pct;
+        state.examples = false;
+        pctEl.value = String(state.pct);
+        histName.value = h.name;
+        save();
+        render();
+        histNote.textContent = 'Cargada: ' + h.name + '.';
+      });
+      const del = part(entry, '[data-h="del"]');
+      del.setAttribute('aria-label', 'Eliminar del historial: ' + h.name);
+      del.addEventListener('click', () => {
+        history.splice(i, 1);
+        saveHistory(history);
+        renderHistory();
+        histNote.textContent = HIST_HINT;
+      });
+      histEl.append(entry);
+    });
+  }
+
+  byId('histSave').addEventListener('click', () => {
+    if (!state.items.length) {
+      histNote.textContent = 'Lista vacía. Agrega al menos un ítem antes de guardar.';
+      return;
+    }
+    const now = new Date();
+    const name = histName.value.trim() || 'Lista del ' + now.toLocaleDateString('es-CO', { dateStyle: 'medium' });
+    history.unshift({ name, at: now.getTime(), pct: clampPct(state.pct), items: structuredClone(state.items) });
+    if (saveHistory(history)) {
+      histNote.textContent = 'Guardada: ' + name + '.';
+      histName.value = '';
+    } else {
+      history.shift();
+      histNote.textContent = 'No se pudo guardar. Este navegador bloquea el almacenamiento local.';
+    }
+    renderHistory();
+  });
+
+  // PDF
+  function say(msg: string) {
+    pdfNote.textContent = msg;
+    pdfNote.hidden = !msg;
+  }
+
+  byId('pdf').addEventListener('click', async () => {
+    if (!state.items.some(isActive)) {
+      say('No hay ítems activos para exportar.');
+      return;
+    }
+    say('Preparando descarga…');
+    let JsPDF: Awaited<ReturnType<typeof loadJsPDF>>;
+    try {
+      JsPDF = await loadJsPDF();
+    } catch {
+      say('No cargó el generador de PDF. Recarga la página e intenta de nuevo.');
+      return;
+    }
+    const title = histName.value.trim() || 'Lista de ítems';
+    const now = new Date();
+    let data: ArrayBuffer;
+    try {
+      data = buildPdf(JsPDF, title, state.items, state.pct, now);
+    } catch {
+      say('No se pudo generar el PDF.');
+      return;
+    }
+    say(
+      downloadPdf(pdfFilename(title, now), data)
+        ? 'Descarga enviada al navegador. Si no aparece el archivo, esta vista bloquea descargas.'
+        : 'Esta vista bloquea la descarga de archivos.',
+    );
+  });
+
+  pctEl.value = String(state.pct);
+  render();
+  renderHistory();
+</script>
