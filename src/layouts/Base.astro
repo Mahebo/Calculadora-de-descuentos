@@ -1,19 +1,23 @@
 ---
 import '@fontsource-variable/bricolage-grotesque/opsz.css';
 import '../styles/global.css';
-import { UMAMI_WEBSITE_ID } from '../lib/analytics';
 import { dict, LANGS } from '../i18n';
+import { ORIGINS, UMAMI_ID } from '../lib/site';
 
-// Idioma elegido por el middleware; título, descripción e imagen salen del diccionario.
+// <html lang> sigue el idioma de la interfaz; los metadatos siguen el dominio (src/middleware.ts):
+// el dominio de SITE_URL_ES comparte en español y el de SITE_URL_EN en inglés.
 const lang = Astro.locals.lang;
-const t = dict(lang);
-const otherLocales = LANGS.filter((l) => l !== lang).map((l) => dict(l).ogLocale);
+const seoLang = Astro.locals.seoLang;
+const t = dict(seoLang);
+const origin = ORIGINS[seoLang];
+const otherLocales = LANGS.filter((l) => l !== seoLang).map((l) => dict(l).ogLocale);
 // Las dos imágenes (public/ogimage.jpg y public/ogimage-en.jpg) miden lo mismo; si cambian, actualizar aquí.
 const IMAGE_SIZE = { width: 1672, height: 941 };
 
-if (!Astro.site) throw new Error('Falta `site` en astro.config.mjs: hace falta para las URL absolutas.');
-const canonical = new URL(Astro.url.pathname, Astro.site).href;
-const imageUrl = new URL(t.seo.image, Astro.site).href;
+const path = Astro.url.pathname;
+const canonical = new URL(path, origin).href;
+const imageUrl = new URL(t.seo.image, origin).href;
+const umamiDomains = LANGS.map((l) => new URL(ORIGINS[l]).hostname).join(',');
 ---
 
 <!doctype html>
@@ -24,13 +28,15 @@ const imageUrl = new URL(t.seo.image, Astro.site).href;
     <title>{t.seo.title}</title>
     <meta name="description" content={t.seo.description} />
     <link rel="canonical" href={canonical} />
+    {LANGS.map((l) => <link rel="alternate" hreflang={l} href={new URL(path, ORIGINS[l]).href} />)}
+    <link rel="alternate" hreflang="x-default" href={new URL(path, ORIGINS.en).href} />
     <meta name="robots" content="index, follow, max-image-preview:large" />
     <meta name="author" content="Mauro Hernández" />
     <meta name="color-scheme" content="light" />
     <meta name="theme-color" content="#eef0fa" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-    <link rel="sitemap" href="/sitemap-index.xml" />
+    <link rel="sitemap" href="/sitemap.xml" />
 
     {/* Open Graph */}
     <meta property="og:type" content="website" />
@@ -54,13 +60,13 @@ const imageUrl = new URL(t.seo.image, Astro.site).href;
     <meta name="twitter:image:alt" content={t.seo.imageAlt} />
 
     {
-      import.meta.env.PROD && (
+      import.meta.env.PROD && UMAMI_ID && (
         <script
           is:inline
           defer
           src="https://cloud.umami.is/script.js"
-          data-website-id={UMAMI_WEBSITE_ID}
-          data-domains={Astro.site.hostname}
+          data-website-id={UMAMI_ID}
+          data-domains={umamiDomains}
         />
       )
     }

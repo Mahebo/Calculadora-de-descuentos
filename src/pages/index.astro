@@ -7,31 +7,34 @@ import History from '../components/History.astro';
 import { summarize } from '../lib/calc';
 import { exampleState } from '../lib/storage';
 import { dict } from '../i18n';
+import { ORIGINS } from '../lib/site';
 
 // Se genera en cada petición: el idioma depende del navegador o del selector (src/middleware.ts).
 export const prerender = false;
 
 const t = dict(Astro.locals.lang);
+// Metadatos (JSON-LD) en el idioma del dominio, como el resto del SEO (ver Base.astro).
+const seo = dict(Astro.locals.seoLang);
+const origin = ORIGINS[Astro.locals.seoLang];
 
 // Estado inicial (filas de ejemplo) renderizado en el servidor: lo ven los buscadores y la página no
 // salta al cargar. El script lo vuelve a dibujar con lo guardado en el navegador, si hay algo.
 const initial = exampleState(t.table.examples);
 const totals = summarize(initial.items, initial.pct);
 
-const site = Astro.site?.href;
 const jsonLd = {
   '@context': 'https://schema.org',
   '@type': 'WebApplication',
-  name: t.seo.ogTitle,
-  url: site,
-  description: t.seo.description,
-  image: site && new URL(t.seo.image, site).href,
-  inLanguage: t.lang,
+  name: seo.seo.ogTitle,
+  url: origin + '/',
+  description: seo.seo.description,
+  image: new URL(seo.seo.image, origin).href,
+  inLanguage: seo.lang,
   applicationCategory: 'BusinessApplication',
   operatingSystem: 'Web',
-  browserRequirements: t.seo.browserRequirements,
+  browserRequirements: seo.seo.browserRequirements,
   isAccessibleForFree: true,
-  offers: { '@type': 'Offer', price: '0', priceCurrency: t.seo.priceCurrency },
+  offers: { '@type': 'Offer', price: '0', priceCurrency: seo.seo.priceCurrency },
   author: { '@type': 'Person', name: 'Mauro Hernández', url: 'https://mahebo.com' },
   publisher: { '@type': 'Organization', name: 'Mahebo', url: 'https://mahebo.com' },
 };

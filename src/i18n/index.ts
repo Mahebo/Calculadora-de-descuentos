@@ -1,5 +1,7 @@
-// Idiomas de la interfaz. El servidor elige uno por petición (ver src/middleware.ts) y el
-// script de la página lo lee de <html lang>.
+// Idiomas. El servidor decide dos cosas por petición (src/middleware.ts):
+// - el idioma de los metadatos (SEO, Open Graph), según el dominio;
+// - el idioma de la interfaz, según la elección del selector o el navegador.
+// El script de la página lee el de la interfaz de <html lang>.
 import { en } from './en';
 import { es, type Dict } from './es';
 
@@ -9,8 +11,18 @@ export type Lang = 'es' | 'en';
 export const LANGS: readonly Lang[] = ['es', 'en'];
 /** Nombre de cada idioma en su propio idioma (selector ES · EN). */
 export const LANG_NAMES: Record<Lang, string> = { es: 'Español', en: 'English' };
-/** Para cualquier idioma que no sea español ni inglés, o si el navegador no envía ninguno. */
+/** Si no hay nada mejor (valor desconocido en dict()). */
 export const DEFAULT_LANG: Lang = 'en';
+
+/**
+ * Idioma del dominio de la petición (cabecera Host), comparado con el dominio de cada idioma
+ * (`origins`, de las variables de entorno: src/lib/site.ts). Cualquier otro host (localhost,
+ * previews) usa español.
+ */
+export function domainLang(host: string | null | undefined, origins: Record<Lang, string>): Lang {
+  const hostname = (host ?? '').trim().toLowerCase().replace(/:\d+$/, '');
+  return LANGS.find((l) => new URL(origins[l]).hostname === hostname) ?? 'es';
+}
 /** Cookie que guarda la elección hecha con el selector ES · EN. */
 export const LANG_COOKIE = 'lang';
 
@@ -25,13 +37,17 @@ export function dict(lang: unknown): Dict {
 }
 
 /**
- * Idioma de la respuesta: primero la elección guardada en la cookie; si no hay, el idioma
- * soportado con mayor peso (q) en Accept-Language; si ninguno coincide, DEFAULT_LANG.
+ * Idioma de la interfaz: primero la elección guardada en la cookie; si no hay, el idioma
+ * soportado con mayor peso (q) en Accept-Language; si ninguno coincide, `fallback` (el del dominio).
  * Con pesos iguales gana el que aparece primero.
  */
-export function pickLang(cookie: string | undefined, acceptLanguage: string | null | undefined): Lang {
+export function pickLang(
+  cookie: string | undefined,
+  acceptLanguage: string | null | undefined,
+  fallback: Lang = DEFAULT_LANG,
+): Lang {
   if (isLang(cookie)) return cookie;
-  let best: Lang = DEFAULT_LANG;
+  let best: Lang = fallback;
   let bestQ = 0;
   for (const part of (acceptLanguage ?? '').split(',')) {
     const [tag = '', ...params] = part.split(';');

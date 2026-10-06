@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { dict, pickLang } from './index';
+import { dict, domainLang, pickLang } from './index';
 import { en } from './en';
 import { es } from './es';
 
@@ -33,6 +33,30 @@ describe('pickLang: idioma de la respuesta', () => {
 
   it('ignora cookies inválidas', () => {
     expect(pickLang('fr', 'es-CO')).toBe('es');
+  });
+
+  it('sin preferencia útil usa el idioma del dominio', () => {
+    expect(pickLang(undefined, null, 'es')).toBe('es');
+    expect(pickLang(undefined, 'fr-FR,fr', 'es')).toBe('es');
+    expect(pickLang(undefined, 'fr-FR,fr', 'en')).toBe('en');
+    expect(pickLang(undefined, 'en-US', 'es')).toBe('en');
+    expect(pickLang('es', 'en-US', 'en')).toBe('es');
+  });
+});
+
+describe('domainLang: idioma de los metadatos según el dominio', () => {
+  const origins = { es: 'https://calculadora.mahebo.com', en: 'https://calculator.mahebo.com' };
+  it('cada dominio con su idioma', () => {
+    expect(domainLang('calculadora.mahebo.com', origins)).toBe('es');
+    expect(domainLang('calculator.mahebo.com', origins)).toBe('en');
+    expect(domainLang('Calculator.Mahebo.com:443', origins)).toBe('en');
+  });
+
+  it('cualquier otro host usa español', () => {
+    expect(domainLang('localhost:4321', origins)).toBe('es');
+    expect(domainLang('calculator.mahebo.com.evil.com', origins)).toBe('es');
+    expect(domainLang('', origins)).toBe('es');
+    expect(domainLang(null, origins)).toBe('es');
   });
 });
 
