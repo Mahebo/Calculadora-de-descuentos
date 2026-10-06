@@ -1,6 +1,11 @@
 ---
 import Sparkle from './Sparkle.astro';
 import { MAX_PCT } from '../lib/calc';
+import { dict, LANG_NAMES, type Lang } from '../i18n';
+
+const lang = Astro.locals.lang;
+const t = dict(lang);
+const LANG_ORDER: Lang[] = ['en', 'es'];
 ---
 
 <header class="flex flex-wrap items-center justify-between gap-x-6 gap-y-5 lg:col-span-2">
@@ -11,27 +16,95 @@ import { MAX_PCT } from '../lib/calc';
     </span>
     <div class="min-w-0">
       <h1 class="m-0 text-[2.1rem] leading-[1.05] font-bold tracking-[-0.02em] text-balance max-sm:text-[1.65rem]">
-        Calculadora de descuento
+        {t.header.title}
       </h1>
-      <p class="mt-1.5 max-w-[36rem] text-balance text-muted">
-        Establece el % de descuento, agrega ítems con precio por unidad y cantidad. El total, el descuento y la
-        ganancia potencial se calculan solos.
-      </p>
+      <p class="mt-1.5 max-w-[36rem] text-balance text-muted">{t.header.subtitle}</p>
     </div>
   </div>
-  <label class="card flex items-center gap-3 rounded-full py-2 pr-2 pl-5" for="pct">
-    <span class="label">Descuento</span>
-    <span class="flex items-center gap-1 rounded-full bg-peach pr-4">
-      <input
-        id="pct"
-        class="field w-16 rounded-full border-transparent bg-transparent pr-1 pl-2 text-right text-[1.15rem] font-bold hover:border-transparent focus-visible:outline-hidden"
-        type="number"
-        min="0"
-        max={MAX_PCT}
-        step="0.1"
-        value="43"
-        inputmode="decimal"
-      /><span class="text-[1.15rem] font-bold">%</span>
-    </span>
-  </label>
+  <div class="flex items-center gap-3 max-sm:w-full max-sm:justify-between">
+    <label class="card flex items-center gap-3 rounded-full py-2 pr-2 pl-5" for="pct">
+      <span class="label">{t.header.discount}</span>
+      <span class="flex items-center gap-1 rounded-full bg-peach pr-4">
+        <input
+          id="pct"
+          class="field w-16 rounded-full border-transparent bg-transparent pr-1 pl-2 text-right text-[1.15rem] font-bold hover:border-transparent focus-visible:outline-hidden"
+          type="number"
+          min="0"
+          max={MAX_PCT}
+          step="0.1"
+          value="43"
+          inputmode="decimal"
+        /><span class="text-[1.15rem] font-bold">%</span>
+      </span>
+    </label>
+
+    {/*
+      Selector de idioma: globo que abre un menú. Con ratón se abre al pasar por encima (hover solo
+      aplica en dispositivos con ratón); al tocar o con Enter, el script alterna data-open.
+      Cada opción es ?lang=…, que guarda la cookie (src/middleware.ts).
+    */}
+    <div class="group relative" id="lang">
+      <button
+        type="button"
+        id="lang-btn"
+        class="card grid size-12 cursor-pointer place-items-center rounded-full text-ink transition-colors hover:text-accent"
+        aria-label={t.header.languageNav}
+        aria-expanded="false"
+        aria-controls="lang-menu"
+      >
+        <svg
+          class="size-5"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.75"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+          ><circle cx="12" cy="12" r="10"></circle><path d="M2 12h20"></path><path
+            d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"
+          ></path></svg
+        >
+      </button>
+      <div
+        id="lang-menu"
+        class="invisible absolute top-full right-0 z-20 pt-2 opacity-0 transition group-hover:visible group-hover:opacity-100 group-data-open:visible group-data-open:opacity-100"
+      >
+        <ul class="card m-0 flex min-w-40 list-none flex-col gap-0.5 rounded-2xl p-1.5">
+          {
+            LANG_ORDER.map((l) => (
+              <li>
+                <a
+                  href={`/?lang=${l}`}
+                  hreflang={l}
+                  lang={l}
+                  aria-current={l === lang ? 'true' : undefined}
+                  class:list={[
+                    'flex items-center justify-between gap-4 rounded-xl px-3 py-2 text-[.9rem] transition-colors',
+                    l === lang ? 'bg-lavender font-semibold text-ink' : 'text-muted hover:bg-soft hover:text-ink',
+                  ]}
+                >
+                  {LANG_NAMES[l]}
+                  {l === lang && (
+                    <svg
+                      class="size-4 text-accent"
+                      viewBox="0 0 16 16"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      aria-hidden="true"
+                    >
+                      <path d="M3.5 8.5l3 3 6-7" />
+                    </svg>
+                  )}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </div>
+  </div>
 </header>

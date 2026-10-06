@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
   clampPct,
-  countLabel,
   itemDiscounted,
   itemTotal,
   money,
@@ -10,6 +9,8 @@ import {
   summarize,
   type Item,
 } from './calc';
+import { en } from '../i18n/en';
+import { es } from '../i18n/es';
 
 describe('caso de prueba del encargo', () => {
   const items: Item[] = [
@@ -20,13 +21,20 @@ describe('caso de prueba del encargo', () => {
   const s = summarize(items, 43);
 
   it('suma solo los ítems activos', () => {
-    expect(money(s.total)).toBe('$228.500');
-    expect(money(s.pay)).toBe('$130.245');
-    expect(money(s.gain)).toBe('$98.255');
+    expect(money(s.total, 'es-CO')).toBe('$228.500');
+    expect(money(s.pay, 'es-CO')).toBe('$130.245');
+    expect(money(s.gain, 'es-CO')).toBe('$98.255');
   });
 
   it('cuenta los activos', () => {
-    expect(countLabel(s.active, s.count)).toBe('2 de 3 ítems activos');
+    expect(es.table.countLabel(s.active, s.count)).toBe('2 de 3 ítems activos');
+  });
+
+  it('en inglés', () => {
+    expect(money(s.total, 'en-US')).toBe('$228,500');
+    expect(money(s.pay, 'en-US')).toBe('$130,245');
+    expect(money(s.gain, 'en-US')).toBe('$98,255');
+    expect(en.table.countLabel(s.active, s.count)).toBe('2 of 3 items active');
   });
 });
 
@@ -66,15 +74,18 @@ describe('entradas inválidas', () => {
 });
 
 describe('formato y contador', () => {
-  it('formatea dinero en es-CO', () => {
-    expect(money(0)).toBe('$0');
-    expect(money(1234567.891)).toBe('$1.234.567,89');
+  it('formatea dinero según el locale', () => {
+    expect(money(0, 'es-CO')).toBe('$0');
+    expect(money(1234567.891, 'es-CO')).toBe('$1.234.567,89');
+    expect(money(1234567.891, 'en-US')).toBe('$1,234,567.89');
   });
 
   it('singular, plural y parcial', () => {
-    expect(countLabel(1, 1)).toBe('1 ítem');
-    expect(countLabel(3, 3)).toBe('3 ítems');
-    expect(countLabel(0, 0)).toBe('0 ítems');
+    expect(es.table.countLabel(1, 1)).toBe('1 ítem');
+    expect(es.table.countLabel(3, 3)).toBe('3 ítems');
+    expect(es.table.countLabel(0, 0)).toBe('0 ítems');
+    expect(en.table.countLabel(1, 1)).toBe('1 item');
+    expect(en.table.countLabel(3, 3)).toBe('3 items');
   });
 
   it('ítem sin "on" cuenta como activo', () => {
@@ -88,5 +99,7 @@ describe('nombre del PDF', () => {
     expect(pdfFilename('Lista de ítems', d)).toBe('lista-de-items-2026-10-05.pdf');
     expect(pdfFilename('  Compras: Año Nuevo!! ', d)).toBe('compras-ano-nuevo-2026-10-05.pdf');
     expect(pdfFilename('¿?', d)).toBe('lista-2026-10-05.pdf');
+    expect(pdfFilename('Item list', d, 'list')).toBe('item-list-2026-10-05.pdf');
+    expect(pdfFilename('¿?', d, 'list')).toBe('list-2026-10-05.pdf');
   });
 });

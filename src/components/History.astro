@@ -1,25 +1,28 @@
 ---
-import { EMPTY_HISTORY, emptyState } from '../lib/ui';
+import { emptyState } from '../lib/ui';
+import { dict } from '../i18n';
+
+const t = dict(Astro.locals.lang);
 ---
 
-<section class="card flex flex-col gap-4 p-5 sm:p-6 lg:col-start-1" aria-label="Historial">
-  <h2 class="m-0 text-[1.2rem] font-semibold">Historial</h2>
+<section class="card flex flex-col gap-4 p-5 sm:p-6 lg:col-start-1" aria-label={t.history.heading}>
+  <h2 class="m-0 text-[1.2rem] font-semibold">{t.history.heading}</h2>
   <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:rounded-full sm:bg-soft sm:p-1.5 sm:pl-2">
     <input
       id="histName"
       class="field rounded-full px-4 py-2.5 sm:border-transparent sm:bg-transparent sm:hover:border-transparent"
       type="text"
-      placeholder="Nombre para esta lista (opcional)"
-      aria-label="Nombre para guardar esta lista"
+      placeholder={t.history.namePlaceholder}
+      aria-label={t.history.nameAria}
     />
     <button class="btn btn-accent shrink-0" id="histSave" type="button">
-      Guardar en historial
+      {t.history.save}
       <svg class="size-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"></path></svg>
     </button>
   </div>
-  <p class="note px-1" id="histNote">Se guarda solo en este navegador. Cargar una lista reemplaza la actual.</p>
+  <p class="note px-1" id="histNote">{t.history.hint}</p>
   <div class="flex flex-col gap-2" id="histList">
-    <div class={emptyState}>{EMPTY_HISTORY}</div>
+    <div class={emptyState}>{t.history.empty}</div>
   </div>
 </section>
 
@@ -36,8 +39,8 @@ import { EMPTY_HISTORY, emptyState } from '../lib/ui';
       <div data-h="meta" class="text-[.85rem] text-muted tabular-nums"></div>
     </div>
     <div class="flex gap-2 max-sm:w-full max-sm:pl-15">
-      <button type="button" data-h="load" class="btn btn-ghost btn-small">Cargar</button>
-      <button type="button" data-h="del" class="btn btn-ghost btn-small hover:text-danger">Eliminar</button>
+      <button type="button" data-h="load" class="btn btn-ghost btn-small">{t.history.load}</button>
+      <button type="button" data-h="del" class="btn btn-ghost btn-small hover:text-danger">{t.history.delete}</button>
     </div>
   </div>
 </template>

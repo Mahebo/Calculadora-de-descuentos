@@ -8,13 +8,18 @@
     "email": "hello@mahebo.com",
     "url": "https://mahebo.com"
   },
+  "engines": {
+    "node": ">=22.12"
+  },
   "scripts": {
     "dev": "astro dev",
     "build": "astro check && astro build",
+    "start": "node ./dist/server/entry.mjs",
     "preview": "astro preview",
     "test": "vitest run"
   },
   "dependencies": {
+    "@astrojs/node": "^11.1.6",
     "@astrojs/sitemap": "^3.7.4",
     "@fontsource-variable/bricolage-grotesque": "^5.3.0",
     "astro": "^7.3.5",

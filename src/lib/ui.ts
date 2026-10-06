@@ -1,4 +1,5 @@
-// Clases y textos que comparten el HTML generado en el build y el script de la página.
+// Clases que comparten el HTML generado en el servidor y el script de la página.
+// Los textos están en src/i18n/.
 
 /**
  * Rejilla de las filas de la tabla de ítems.
@@ -13,7 +14,3 @@ export const mobileLabelBase = 'hidden text-right text-[.68rem] font-semibold tr
 export const mobileLabel = mobileLabelBase + ' text-muted';
 export const outValue = 'tabular-nums wrap-anywhere';
 export const emptyState = 'rounded-tile bg-soft px-4 py-7 text-center text-muted';
-
-export const EXAMPLES_NOTE = 'Las filas iniciales son ejemplos. Edítalas o vacía la lista.';
-export const EMPTY_ROWS = 'Lista vacía. Usa "Agregar ítem" para empezar.';
-export const EMPTY_HISTORY = 'Sin listas guardadas todavía.';

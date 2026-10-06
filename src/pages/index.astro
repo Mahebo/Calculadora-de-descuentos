@@ -6,44 +6,38 @@ import Results from '../components/Results.astro';
 import History from '../components/History.astro';
 import { summarize } from '../lib/calc';
 import { exampleState } from '../lib/storage';
+import { dict } from '../i18n';
 
-// Estado inicial (filas de ejemplo) generado en el build: lo ven los buscadores y la página no
+// Se genera en cada petición: el idioma depende del navegador o del selector (src/middleware.ts).
+export const prerender = false;
+
+const t = dict(Astro.locals.lang);
+
+// Estado inicial (filas de ejemplo) renderizado en el servidor: lo ven los buscadores y la página no
 // salta al cargar. El script lo vuelve a dibujar con lo guardado en el navegador, si hay algo.
-const initial = exampleState();
+const initial = exampleState(t.table.examples);
 const totals = summarize(initial.items, initial.pct);
-
-const title = 'Calculadora de Descuentos para Emprendedores | Mahebo';
-const ogTitle = 'Calculadora de descuentos para emprendedores';
-const description =
-  'Calcula descuentos y conoce con precisión cuánto ganas en cada venta. Una herramienta para emprendedores que te ayuda a controlar tu margen de ganancia al ofrecer o recibir descuentos.';
-// Si cambias public/ogimage.jpg, actualiza aquí sus medidas.
-const image = {
-  src: '/ogimage.jpg',
-  width: 1672,
-  height: 941,
-  alt: 'Calculadora de descuentos: etiqueta de precio con el símbolo de porcentaje',
-};
 
 const site = Astro.site?.href;
 const jsonLd = {
   '@context': 'https://schema.org',
   '@type': 'WebApplication',
-  name: ogTitle,
+  name: t.seo.ogTitle,
   url: site,
-  description,
-  image: site && new URL(image.src, site).href,
-  inLanguage: 'es',
+  description: t.seo.description,
+  image: site && new URL(t.seo.image, site).href,
+  inLanguage: t.lang,
   applicationCategory: 'BusinessApplication',
   operatingSystem: 'Web',
-  browserRequirements: 'Requiere JavaScript.',
+  browserRequirements: t.seo.browserRequirements,
   isAccessibleForFree: true,
-  offers: { '@type': 'Offer', price: '0', priceCurrency: 'COP' },
+  offers: { '@type': 'Offer', price: '0', priceCurrency: t.seo.priceCurrency },
   author: { '@type': 'Person', name: 'Mauro Hernández', url: 'https://mahebo.com' },
   publisher: { '@type': 'Organization', name: 'Mahebo', url: 'https://mahebo.com' },
 };
 ---
 
-<Base title={title} ogTitle={ogTitle} description={description} image={image}>
+<Base>
   <script is:inline slot="head" type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
   <main
     class="mx-auto grid max-w-[860px] gap-6 lg:max-w-[1120px] lg:grid-cols-[minmax(0,1fr)_21rem] lg:gap-x-7"
@@ -58,11 +52,9 @@ const jsonLd = {
 <script>
   import {
     clampPct,
-    countLabel,
     isActive,
     itemDiscounted,
     itemTotal,
-    itemsLabel,
     MAX_PCT,
     money,
     num,
@@ -72,8 +64,13 @@ const jsonLd = {
   } from '../lib/calc';
   import { loadHistory, loadState, saveHistory, saveState } from '../lib/storage';
   import { buildPdf, downloadPdf, loadJsPDF } from '../lib/pdf';
-  import { EMPTY_HISTORY, EMPTY_ROWS, EXAMPLES_NOTE, emptyState as emptyStateClass } from '../lib/ui';
+  import { emptyState as emptyStateClass } from '../lib/ui';
   import { track, trackFirstUse } from '../lib/analytics';
+  import { dict } from '../i18n';
+
+  // Mismo idioma que eligió el servidor. Textos y formato de números y fechas salen de aquí.
+  const t = dict(document.documentElement.lang);
+  const L = t.locale;
 
   function byId<T extends HTMLElement = HTMLElement>(id: string): T {
     const el = document.getElementById(id);
@@ -105,9 +102,8 @@ const jsonLd = {
   const histName = byId<HTMLInputElement>('histName');
   const pdfNote = byId('pdfNote');
   const TONES = ['lavender', 'mint', 'peach', 'sun'];
-  const HIST_HINT = 'Se guarda solo en este navegador. Cargar una lista reemplaza la actual.';
 
-  const state = loadState();
+  const state = loadState(t.table.examples);
   const history = loadHistory();
   let outs: { total: HTMLElement; disc: HTMLElement }[] = [];
 
@@ -120,16 +116,16 @@ const jsonLd = {
   function totals() {
     const s = summarize(state.items, state.pct);
     state.items.forEach((it, i) => {
-      outs[i].total.textContent = money(itemTotal(it));
-      outs[i].disc.textContent = money(itemDiscounted(it, state.pct));
+      outs[i].total.textContent = money(itemTotal(it), L);
+      outs[i].disc.textContent = money(itemDiscounted(it, state.pct), L);
     });
-    byId('sumTotal').textContent = money(s.total);
-    byId('sumDisc').textContent = money(s.pay);
-    byId('pay').textContent = money(s.pay);
-    byId('gain').textContent = money(s.gain);
-    byId('count').textContent = countLabel(s.active, s.count);
-    byId('pctEcho').textContent = num(clampPct(state.pct));
-    noteEl.textContent = state.examples ? EXAMPLES_NOTE : '';
+    byId('sumTotal').textContent = money(s.total, L);
+    byId('sumDisc').textContent = money(s.pay, L);
+    byId('pay').textContent = money(s.pay, L);
+    byId('gain').textContent = money(s.gain, L);
+    byId('count').textContent = t.table.countLabel(s.active, s.count);
+    byId('pctEcho').textContent = num(clampPct(state.pct), L);
+    noteEl.textContent = state.examples ? t.table.examplesNote : '';
   }
 
   function edited() {
@@ -158,7 +154,7 @@ const jsonLd = {
   function render() {
     rowsEl.replaceChildren();
     outs = [];
-    if (!state.items.length) rowsEl.append(emptyState(EMPTY_ROWS));
+    if (!state.items.length) rowsEl.append(emptyState(t.table.empty));
     state.items.forEach((it, i) => {
       const n = i + 1;
       const row = fromTemplate('row-tpl');
@@ -167,7 +163,7 @@ const jsonLd = {
       const tog = part<HTMLInputElement>(row, '[data-f="on"]');
       tog.id = 'on-' + i;
       tog.checked = isActive(it);
-      tog.setAttribute('aria-label', 'Tener en cuenta el ítem ' + n);
+      tog.setAttribute('aria-label', t.table.toggleAria(n));
       tog.addEventListener('change', () => {
         it.on = tog.checked;
         row.toggleAttribute('data-off', !tog.checked);
@@ -177,17 +173,17 @@ const jsonLd = {
       const name = part<HTMLInputElement>(row, '[data-f="name"]');
       name.id = 'name-' + i;
       name.value = it.name || '';
-      name.setAttribute('aria-label', 'Nombre del ítem ' + n);
+      name.setAttribute('aria-label', t.table.nameAria(n));
       name.addEventListener('input', () => {
         it.name = name.value;
         edited();
       });
 
-      numInput(row, 'price', it, i, 'Precio por unidad del ítem ' + n);
-      numInput(row, 'qty', it, i, 'Cantidad del ítem ' + n);
+      numInput(row, 'price', it, i, t.table.priceAria(n));
+      numInput(row, 'qty', it, i, t.table.qtyAria(n));
 
       const del = part(row, '[data-f="del"]');
-      del.setAttribute('aria-label', 'Eliminar ítem ' + n);
+      del.setAttribute('aria-label', t.table.deleteAria(n));
       del.addEventListener('click', () => {
         state.items.splice(i, 1);
         state.examples = false;
@@ -239,31 +235,49 @@ const jsonLd = {
     totals();
   });
 
+  // Selector de idioma: al tocar (móvil) o con Enter se abre y cierra; se cierra al tocar fuera, con Escape
+  // o cuando el foco sale del selector.
+  // Con ratón también se abre al pasar por encima (CSS, ver Header.astro).
+  const langBox = byId('lang');
+  const langBtn = byId<HTMLButtonElement>('lang-btn');
+  function setLangOpen(open: boolean) {
+    langBox.toggleAttribute('data-open', open);
+    langBtn.setAttribute('aria-expanded', String(open));
+  }
+  langBtn.addEventListener('click', () => setLangOpen(!langBox.hasAttribute('data-open')));
+  document.addEventListener('click', (ev) => {
+    if (!langBox.contains(ev.target as Node)) setLangOpen(false);
+  });
+  langBox.addEventListener('focusout', (ev) => {
+    if (!langBox.contains(ev.relatedTarget as Node | null)) setLangOpen(false);
+  });
+  document.addEventListener('keydown', (ev) => {
+    if (ev.key === 'Escape' && langBox.hasAttribute('data-open')) {
+      setLangOpen(false);
+      langBtn.focus();
+    }
+  });
+
   // Historial
   function renderHistory() {
     histEl.replaceChildren();
     if (!history.length) {
-      histEl.append(emptyState(EMPTY_HISTORY));
+      histEl.append(emptyState(t.history.empty));
       return;
     }
     history.forEach((h, i) => {
       const s = summarize(h.items, h.pct);
       const entry = fromTemplate('hist-tpl');
       part(entry, '[data-h="icon"]').dataset.tone = TONES[i % TONES.length];
-      const when = new Date(h.at).toLocaleString('es-CO', { dateStyle: 'medium', timeStyle: 'short' });
       part(entry, '[data-h="name"]').textContent = h.name;
-      part(entry, '[data-h="meta"]').textContent =
-        when +
-        ' · ' +
-        itemsLabel(h.items.length) +
-        ' · Total ' +
-        money(s.total) +
-        ' · A pagar (−' +
-        num(h.pct) +
-        ' %) ' +
-        money(s.pay) +
-        ' · Ganancia ' +
-        money(s.gain);
+      part(entry, '[data-h="meta"]').textContent = t.history.meta({
+        when: new Date(h.at).toLocaleString(L, { dateStyle: 'medium', timeStyle: 'short' }),
+        count: h.items.length,
+        total: money(s.total, L),
+        pct: num(clampPct(h.pct), L),
+        pay: money(s.pay, L),
+        gain: money(s.gain, L),
+      });
 
       part(entry, '[data-h="load"]').addEventListener('click', () => {
         state.items = structuredClone(h.items);
@@ -273,15 +287,15 @@ const jsonLd = {
         histName.value = h.name;
         save();
         render();
-        histNote.textContent = 'Cargada: ' + h.name + '.';
+        histNote.textContent = t.history.loaded(h.name);
       });
       const del = part(entry, '[data-h="del"]');
-      del.setAttribute('aria-label', 'Eliminar del historial: ' + h.name);
+      del.setAttribute('aria-label', t.history.deleteAria(h.name));
       del.addEventListener('click', () => {
         history.splice(i, 1);
         saveHistory(history);
         renderHistory();
-        histNote.textContent = HIST_HINT;
+        histNote.textContent = t.history.hint;
       });
       histEl.append(entry);
     });
@@ -289,19 +303,19 @@ const jsonLd = {
 
   byId('histSave').addEventListener('click', () => {
     if (!state.items.length) {
-      histNote.textContent = 'Lista vacía. Agrega al menos un ítem antes de guardar.';
+      histNote.textContent = t.history.emptyList;
       return;
     }
     const now = new Date();
-    const name = histName.value.trim() || 'Lista del ' + now.toLocaleDateString('es-CO', { dateStyle: 'medium' });
+    const name = histName.value.trim() || t.history.defaultName(now.toLocaleDateString(L, { dateStyle: 'medium' }));
     history.unshift({ name, at: now.getTime(), pct: clampPct(state.pct), items: structuredClone(state.items) });
     if (saveHistory(history)) {
       track('Guardó en historial');
-      histNote.textContent = 'Guardada: ' + name + '.';
+      histNote.textContent = t.history.saved(name);
       histName.value = '';
     } else {
       history.shift();
-      histNote.textContent = 'No se pudo guardar. Este navegador bloquea el almacenamiento local.';
+      histNote.textContent = t.history.blocked;
     }
     renderHistory();
   });
@@ -314,33 +328,29 @@ const jsonLd = {
 
   byId('pdf').addEventListener('click', async () => {
     if (!state.items.some(isActive)) {
-      say('No hay ítems activos para exportar.');
+      say(t.pdf.noActive);
       return;
     }
-    say('Preparando descarga…');
+    say(t.pdf.preparing);
     let JsPDF: Awaited<ReturnType<typeof loadJsPDF>>;
     try {
       JsPDF = await loadJsPDF();
     } catch {
-      say('No cargó el generador de PDF. Recarga la página e intenta de nuevo.');
+      say(t.pdf.loadFailed);
       return;
     }
-    const title = histName.value.trim() || 'Lista de ítems';
+    const title = histName.value.trim() || t.pdf.defaultTitle;
     const now = new Date();
     let data: ArrayBuffer;
     try {
-      data = buildPdf(JsPDF, title, state.items, state.pct, now);
+      data = buildPdf(JsPDF, t, title, state.items, state.pct, now);
     } catch {
-      say('No se pudo generar el PDF.');
+      say(t.pdf.buildFailed);
       return;
     }
-    const sent = downloadPdf(pdfFilename(title, now), data);
+    const sent = downloadPdf(pdfFilename(title, now, t.pdf.fileFallback), data);
     if (sent) track('Descargó PDF');
-    say(
-      sent
-        ? 'Descarga enviada al navegador. Si no aparece el archivo, esta vista bloquea descargas.'
-        : 'Esta vista bloquea la descarga de archivos.',
-    );
+    say(sent ? t.pdf.sent : t.pdf.blocked);
   });
 
   pctEl.value = String(state.pct);

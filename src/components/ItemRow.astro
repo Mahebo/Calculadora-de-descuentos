@@ -1,8 +1,9 @@
 ---
-// Una fila de la tabla. Con `item` sale rellena desde el build (estado inicial, sin saltos al cargar);
+// Una fila de la tabla. Con `item` sale rellena desde el servidor (estado inicial, sin saltos al cargar);
 // sin `item` es la plantilla vacía que el script clona y rellena.
 import { isActive, itemDiscounted, itemTotal, money, type Item } from '../lib/calc';
 import { mobileLabel, numCell, outValue, rowGrid } from '../lib/ui';
+import { dict } from '../i18n';
 
 interface Props {
   item?: Item;
@@ -12,14 +13,15 @@ interface Props {
 
 const { item, index = 0, pct = 0 } = Astro.props;
 const n = index + 1;
+const t = dict(Astro.locals.lang);
 const text = (v: unknown) => (v === '' || v == null ? '' : String(v));
 const f = item && {
   on: isActive(item),
   name: item.name || '',
   price: text(item.price),
   qty: text(item.qty),
-  total: money(itemTotal(item)),
-  disc: money(itemDiscounted(item, pct)),
+  total: money(itemTotal(item), t.locale),
+  disc: money(itemDiscounted(item, pct), t.locale),
 };
 ---
 
@@ -29,26 +31,26 @@ const f = item && {
     data-f="on"
     id={f && `on-${index}`}
     checked={f?.on}
-    aria-label={f && `Tener en cuenta el ítem ${n}`}
+    aria-label={f && t.table.toggleAria(n)}
     class="check max-sm:col-start-1 max-sm:row-start-1 max-sm:self-center"
-    title="Tener en cuenta en las sumas"
+    title={t.table.toggleTitle}
   />
   <input
     type="text"
     data-f="name"
     id={f && `name-${index}`}
     value={f?.name}
-    aria-label={f && `Nombre del ítem ${n}`}
+    aria-label={f && t.table.nameAria(n)}
     class="field group-data-off:text-muted max-sm:col-[2/-1] max-sm:row-start-1"
-    placeholder="Nombre del ítem"
+    placeholder={t.table.namePlaceholder}
   />
   <span class:list={[numCell, 'max-sm:col-start-2 max-sm:row-start-2']}>
-    <span class={mobileLabel}>Precio unidad</span><input
+    <span class={mobileLabel}>{t.table.unitPrice}</span><input
       type="number"
       data-f="price"
       id={f && `price-${index}`}
       value={f?.price}
-      aria-label={f && `Precio por unidad del ítem ${n}`}
+      aria-label={f && t.table.priceAria(n)}
       min="0"
       step="any"
       inputmode="decimal"
@@ -57,12 +59,12 @@ const f = item && {
     />
   </span>
   <span class:list={[numCell, 'max-sm:col-start-3 max-sm:row-start-2']}>
-    <span class={mobileLabel}>Cantidad</span><input
+    <span class={mobileLabel}>{t.table.quantity}</span><input
       type="number"
       data-f="qty"
       id={f && `qty-${index}`}
       value={f?.qty}
-      aria-label={f && `Cantidad del ítem ${n}`}
+      aria-label={f && t.table.qtyAria(n)}
       min="0"
       step="1"
       inputmode="decimal"
@@ -71,13 +73,13 @@ const f = item && {
     />
   </span>
   <span class:list={[numCell, 'max-sm:col-start-2 max-sm:row-start-3']}>
-    <span class={mobileLabel}>Precio total</span><span
+    <span class={mobileLabel}>{t.table.totalPrice}</span><span
       data-out="total"
       class:list={[outValue, 'font-medium group-data-off:text-muted group-data-off:line-through']}>{f?.total}</span
     >
   </span>
   <span class:list={[numCell, 'max-sm:col-start-3 max-sm:row-start-3']}>
-    <span class={mobileLabel}>Con descuento</span><span
+    <span class={mobileLabel}>{t.table.discounted}</span><span
       data-out="disc"
       class:list={[outValue, 'font-semibold group-data-off:text-muted group-data-off:line-through']}>{f?.disc}</span
     >
@@ -85,7 +87,7 @@ const f = item && {
   <button
     type="button"
     data-f="del"
-    aria-label={f && `Eliminar ítem ${n}`}
+    aria-label={f && t.table.deleteAria(n)}
     class="grid size-9 cursor-pointer place-items-center rounded-full text-[1.2rem] leading-none text-muted transition-colors hover:bg-peach hover:text-danger max-sm:col-start-4 max-sm:row-start-2"
     >×</button
   >

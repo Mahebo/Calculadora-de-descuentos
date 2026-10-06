@@ -1,6 +1,9 @@
 ---
 // Mini banner de referido de Hostinger, con los tonos oscuros de sus tarjetas. rel="sponsored": es un enlace de afiliado.
+import { dict } from '../i18n';
+
 const REFERRAL_URL = 'https://www.hostinger.com?REFERRALCODE=Mahebo';
+const t = dict(Astro.locals.lang);
 ---
 
 <a
@@ -15,8 +18,8 @@ const REFERRAL_URL = 'https://www.hostinger.com?REFERRALCODE=Mahebo';
       <span class="text-[1.6rem] leading-none" aria-hidden="true">🔥</span>
       <span class="text-[2.6rem] leading-none font-bold tracking-[-0.03em] text-hostinger-lilac">20%</span>
       <span class="text-[.72rem] leading-tight font-semibold tracking-[.08em] text-on-accent/75 uppercase">
-        <span class="block">extra en</span>
-        <span class="block">Hostinger</span>
+        <span class="block">{t.banner.extraLine1}</span>
+        <span class="block">{t.banner.extraLine2}</span>
       </span>
     </span>
     <span
@@ -35,9 +38,9 @@ const REFERRAL_URL = 'https://www.hostinger.com?REFERRALCODE=Mahebo';
     </span>
   </span>
   <span class="mt-4 block leading-snug font-medium text-balance">
-    Obtén un descuento adicional en tu plan de hosting.
+    {t.banner.title}
   </span>
   <span class="mt-1.5 block text-[.85rem] text-on-accent/80">
-    Entra desde aquí y el descuento de referido se aplicará automáticamente.
+    {t.banner.subtitle}
   </span>
 </a>

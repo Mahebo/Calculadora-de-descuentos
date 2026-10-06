@@ -2,14 +2,16 @@
 // para que no pese en la carga inicial.
 import type { jsPDF as JsPDF } from 'jspdf';
 import { isActive, itemDiscounted, itemTotal, money, num, clampPct, pos, type Item } from './calc';
+import type { Dict } from '../i18n';
 
 export async function loadJsPDF(): Promise<typeof JsPDF> {
   return (await import('jspdf')).jsPDF;
 }
 
-/** A4 vertical, márgenes de 15 mm, Helvetica. Solo ítems activos. */
+/** A4 vertical, márgenes de 15 mm, Helvetica. Solo ítems activos. Textos y formatos del idioma `t`. */
 export function buildPdf(
   JsPDFCtor: typeof JsPDF,
+  t: Dict,
   title: string,
   items: readonly Item[],
   pctValue: unknown,
@@ -23,7 +25,7 @@ export function buildPdf(
   const cols = { unit: 118, qty: 134, total: 164, disc: R };
   const active = items.filter(isActive);
   // Helvetica estándar no tiene U+202F (espacio estrecho que algunos navegadores ponen antes de "p. m.").
-  const when = now.toLocaleString('es-CO', { dateStyle: 'long', timeStyle: 'short' }).replace(/ /g, ' ');
+  const when = now.toLocaleString(t.locale, { dateStyle: 'long', timeStyle: 'short' }).replace(/ /g, ' ');
 
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(16);
@@ -32,18 +34,18 @@ export function buildPdf(
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(10);
   doc.setTextColor(90);
-  doc.text(when + '  ·  Descuento ' + num(pct) + ' %', L, y);
+  doc.text(when + '  ·  ' + t.pdf.discount(num(pct, t.locale)), L, y);
   y += 10;
 
   function header() {
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(9);
     doc.setTextColor(90);
-    doc.text('ÍTEM', L, y);
-    doc.text('PRECIO UNIDAD', cols.unit, y, { align: 'right' });
-    doc.text('CANT.', cols.qty, y, { align: 'right' });
-    doc.text('PRECIO TOTAL', cols.total, y, { align: 'right' });
-    doc.text('CON DESCUENTO', cols.disc, y, { align: 'right' });
+    doc.text(t.pdf.columns.item, L, y);
+    doc.text(t.pdf.columns.unitPrice, cols.unit, y, { align: 'right' });
+    doc.text(t.pdf.columns.qty, cols.qty, y, { align: 'right' });
+    doc.text(t.pdf.columns.total, cols.total, y, { align: 'right' });
+    doc.text(t.pdf.columns.discounted, cols.disc, y, { align: 'right' });
     y += 2;
     doc.setDrawColor(150);
     doc.line(L, y, R, y);
@@ -54,10 +56,10 @@ export function buildPdf(
   }
   header();
 
-  let t = 0;
-  let d = 0;
+  let sumTotal = 0;
+  let sumPay = 0;
   active.forEach((it, i) => {
-    const lines: string[] = doc.splitTextToSize(it.name && it.name.trim() ? it.name : 'Ítem ' + (i + 1), 68);
+    const lines: string[] = doc.splitTextToSize(it.name && it.name.trim() ? it.name : t.pdf.fallbackName(i + 1), 68);
     const h = lines.length * 4.6 + 3;
     if (y + h > 280) {
       doc.addPage();
@@ -67,12 +69,12 @@ export function buildPdf(
     const total = itemTotal(it);
     const disc = itemDiscounted(it, pct);
     doc.text(lines, L, y);
-    doc.text(money(pos(it.price)), cols.unit, y, { align: 'right' });
-    doc.text(num(pos(it.qty)), cols.qty, y, { align: 'right' });
-    doc.text(money(total), cols.total, y, { align: 'right' });
-    doc.text(money(disc), cols.disc, y, { align: 'right' });
-    t += total;
-    d += disc;
+    doc.text(money(pos(it.price), t.locale), cols.unit, y, { align: 'right' });
+    doc.text(num(pos(it.qty), t.locale), cols.qty, y, { align: 'right' });
+    doc.text(money(total, t.locale), cols.total, y, { align: 'right' });
+    doc.text(money(disc, t.locale), cols.disc, y, { align: 'right' });
+    sumTotal += total;
+    sumPay += disc;
     y += h;
     doc.setDrawColor(215);
     doc.line(L, y - 3.2, R, y - 3.2);
@@ -86,18 +88,18 @@ export function buildPdf(
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(10);
   doc.setTextColor(20);
-  doc.text('Suma precio total (' + active.length + (active.length === 1 ? ' ítem)' : ' ítems)'), L, y);
-  doc.text(money(t), R, y, { align: 'right' });
+  doc.text(t.pdf.sumLabel(active.length), L, y);
+  doc.text(money(sumTotal, t.locale), R, y, { align: 'right' });
   y += 9;
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(14);
-  doc.text('Total a pagar', L, y);
-  doc.text(money(d), R, y, { align: 'right' });
+  doc.text(t.pdf.pay, L, y);
+  doc.text(money(sumPay, t.locale), R, y, { align: 'right' });
   y += 8;
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(10);
-  doc.text('Ganancia potencial', L, y);
-  doc.text(money(t - d), R, y, { align: 'right' });
+  doc.text(t.pdf.gain, L, y);
+  doc.text(money(sumTotal - sumPay, t.locale), R, y, { align: 'right' });
   return doc.output('arraybuffer');
 }
 

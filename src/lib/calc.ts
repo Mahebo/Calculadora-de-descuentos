@@ -19,7 +19,17 @@ export interface Totals {
   count: number;
 }
 
-const fmt = new Intl.NumberFormat('es-CO', { maximumFractionDigits: 2 });
+const formatters = new Map<string, Intl.NumberFormat>();
+
+/** Formateador por locale (es-CO, en-US…), creado una sola vez. */
+function fmt(locale: string): Intl.NumberFormat {
+  let f = formatters.get(locale);
+  if (!f) {
+    f = new Intl.NumberFormat(locale, { maximumFractionDigits: 2 });
+    formatters.set(locale, f);
+  }
+  return f;
+}
 
 /** Vacío, negativo o no numérico cuenta como 0. */
 export function pos(v: unknown): number {
@@ -61,26 +71,17 @@ export function summarize(items: readonly Item[], pct: unknown): Totals {
   return { total, pay, gain: total - pay, active, count: items.length };
 }
 
-export function num(n: number): string {
-  return fmt.format(n);
+export function num(n: number, locale: string): string {
+  return fmt(locale).format(n);
 }
 
-export function money(n: number): string {
-  return '$' + fmt.format(Math.round(n * 100) / 100);
+/** "$130.245" en es-CO, "$130,245" en en-US. */
+export function money(n: number, locale: string): string {
+  return '$' + fmt(locale).format(Math.round(n * 100) / 100);
 }
 
-/** "1 ítem" / "3 ítems". */
-export function itemsLabel(n: number): string {
-  return n + (n === 1 ? ' ítem' : ' ítems');
-}
-
-/** "3 ítems", "1 ítem" o "2 de 3 ítems activos". */
-export function countLabel(active: number, count: number): string {
-  return active === count ? itemsLabel(active) : active + ' de ' + count + ' ítems activos';
-}
-
-/** Minúsculas, sin tildes, con guiones. */
-export function slugify(title: string): string {
+/** Minúsculas, sin tildes, con guiones. Si no queda nada, `fallback`. */
+export function slugify(title: string, fallback = 'lista'): string {
   return (
     title
       .toLowerCase()
@@ -88,7 +89,7 @@ export function slugify(title: string): string {
       .replace(/[̀-ͯ]/g, '')
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/^-+|-+$/g, '')
-      .slice(0, 60) || 'lista'
+      .slice(0, 60) || fallback
   );
 }
 
@@ -98,6 +99,6 @@ export function dateStamp(d: Date): string {
   return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate());
 }
 
-export function pdfFilename(title: string, d: Date): string {
-  return slugify(title) + '-' + dateStamp(d) + '.pdf';
+export function pdfFilename(title: string, d: Date, fallback?: string): string {
+  return slugify(title, fallback) + '-' + dateStamp(d) + '.pdf';
 }

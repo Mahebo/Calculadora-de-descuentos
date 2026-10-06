@@ -19,14 +19,16 @@ export interface HistoryEntry {
   items: Item[];
 }
 
-export function exampleState(): State {
+/** Filas de ejemplo; `names` viene del diccionario del idioma (3 nombres). */
+export function exampleState(names: readonly string[]): State {
+  const [a = '', b = '', c = ''] = names;
   return {
     pct: 43,
     examples: true,
     items: [
-      { name: 'Ítem de ejemplo A', price: 100000, qty: 2 },
-      { name: 'Ítem de ejemplo B', price: 45000, qty: 5 },
-      { name: 'Ítem de ejemplo C', price: 28500, qty: 1 },
+      { name: a, price: 100000, qty: 2 },
+      { name: b, price: 45000, qty: 5 },
+      { name: c, price: 28500, qty: 1 },
     ],
   };
 }
@@ -58,13 +60,13 @@ function write(key: string, value: unknown): boolean {
   }
 }
 
-/** Lista actual guardada o, si no hay, las filas de ejemplo. */
-export function loadState(): State {
+/** Lista actual guardada o, si no hay, las filas de ejemplo con `exampleNames`. */
+export function loadState(exampleNames: readonly string[]): State {
   const saved = read(KEY) as Partial<State> | null;
   if (saved && isItemList(saved.items)) {
     return { pct: saved.pct ?? 43, examples: saved.examples === true, items: withQty(saved.items) };
   }
-  return exampleState();
+  return exampleState(exampleNames);
 }
 
 export function saveState(state: State): void {

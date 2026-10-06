@@ -2,31 +2,27 @@
 import '@fontsource-variable/bricolage-grotesque/opsz.css';
 import '../styles/global.css';
 import { UMAMI_WEBSITE_ID } from '../lib/analytics';
+import { dict, LANGS } from '../i18n';
 
-interface Props {
-  /** <title> y título de buscadores. */
-  title: string;
-  description: string;
-  /** Título al compartir (Open Graph y X). Por defecto, title. */
-  ogTitle?: string;
-  /** Imagen al compartir, ruta dentro de public/. */
-  image: { src: string; width: number; height: number; alt: string };
-}
-
-const { title, description, ogTitle = title, image } = Astro.props;
+// Idioma elegido por el middleware; título, descripción e imagen salen del diccionario.
+const lang = Astro.locals.lang;
+const t = dict(lang);
+const otherLocales = LANGS.filter((l) => l !== lang).map((l) => dict(l).ogLocale);
+// Las dos imágenes (public/ogimage.jpg y public/ogimage-en.jpg) miden lo mismo; si cambian, actualizar aquí.
+const IMAGE_SIZE = { width: 1672, height: 941 };
 
 if (!Astro.site) throw new Error('Falta `site` en astro.config.mjs: hace falta para las URL absolutas.');
 const canonical = new URL(Astro.url.pathname, Astro.site).href;
-const imageUrl = new URL(image.src, Astro.site).href;
+const imageUrl = new URL(t.seo.image, Astro.site).href;
 ---
 
 <!doctype html>
-<html lang="es">
+<html lang={lang}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{title}</title>
-    <meta name="description" content={description} />
+    <title>{t.seo.title}</title>
+    <meta name="description" content={t.seo.description} />
     <link rel="canonical" href={canonical} />
     <meta name="robots" content="index, follow, max-image-preview:large" />
     <meta name="author" content="Mauro Hernández" />
@@ -39,22 +35,23 @@ const imageUrl = new URL(image.src, Astro.site).href;
     {/* Open Graph */}
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Mahebo" />
-    <meta property="og:locale" content="es_CO" />
+    <meta property="og:locale" content={t.ogLocale} />
+    {otherLocales.map((l) => <meta property="og:locale:alternate" content={l} />)}
     <meta property="og:url" content={canonical} />
-    <meta property="og:title" content={ogTitle} />
-    <meta property="og:description" content={description} />
+    <meta property="og:title" content={t.seo.ogTitle} />
+    <meta property="og:description" content={t.seo.description} />
     <meta property="og:image" content={imageUrl} />
     <meta property="og:image:type" content="image/jpeg" />
-    <meta property="og:image:width" content={String(image.width)} />
-    <meta property="og:image:height" content={String(image.height)} />
-    <meta property="og:image:alt" content={image.alt} />
+    <meta property="og:image:width" content={String(IMAGE_SIZE.width)} />
+    <meta property="og:image:height" content={String(IMAGE_SIZE.height)} />
+    <meta property="og:image:alt" content={t.seo.imageAlt} />
 
     {/* X / Twitter */}
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content={ogTitle} />
-    <meta name="twitter:description" content={description} />
+    <meta name="twitter:title" content={t.seo.ogTitle} />
+    <meta name="twitter:description" content={t.seo.description} />
     <meta name="twitter:image" content={imageUrl} />
-    <meta name="twitter:image:alt" content={image.alt} />
+    <meta name="twitter:image:alt" content={t.seo.imageAlt} />
 
     {
       import.meta.env.PROD && (

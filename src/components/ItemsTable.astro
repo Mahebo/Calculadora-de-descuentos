@@ -1,9 +1,10 @@
 ---
 import ItemRow from './ItemRow.astro';
-import { countLabel, money, type Item, type Totals } from '../lib/calc';
-import { EMPTY_ROWS, EXAMPLES_NOTE, emptyState, mobileLabelBase, numCell, outValue, rowGrid } from '../lib/ui';
+import { money, type Item, type Totals } from '../lib/calc';
+import { emptyState, mobileLabelBase, numCell, outValue, rowGrid } from '../lib/ui';
+import { dict } from '../i18n';
 
-/** Estado inicial, renderizado en el build para que la página no salte al cargar. */
+/** Estado inicial, renderizado en el servidor para que la página no salte al cargar. */
 interface Props {
   items: Item[];
   pct: number | string;
@@ -12,36 +13,37 @@ interface Props {
 }
 
 const { items, pct, totals, examples } = Astro.props;
+const t = dict(Astro.locals.lang);
 ---
 
 <div class="flex min-w-0 flex-col gap-4 lg:col-start-1">
-  <section class="card p-2 sm:p-3" aria-label="Ítems">
+  <section class="card p-2 sm:p-3" aria-label={t.table.section}>
     <header class="px-3.5 pt-2.5 pb-2">
-      <h2 class="m-0 text-[1.2rem] font-semibold">Ítems</h2>
+      <h2 class="m-0 text-[1.2rem] font-semibold">{t.table.heading}</h2>
     </header>
     <div class:list={[rowGrid, 'py-2 max-sm:hidden']}>
       <span></span>
-      <span class="label">Ítem</span>
-      <span class="label text-right">Precio unidad</span>
-      <span class="label text-right">Cantidad</span>
-      <span class="label text-right">Precio total</span>
-      <span class="label text-right">Con descuento</span>
+      <span class="label">{t.table.item}</span>
+      <span class="label text-right">{t.table.unitPrice}</span>
+      <span class="label text-right">{t.table.quantity}</span>
+      <span class="label text-right">{t.table.totalPrice}</span>
+      <span class="label text-right">{t.table.discounted}</span>
       <span></span>
     </div>
     <div id="rows" class="flex flex-col gap-2">
       {items.map((item, index) => <ItemRow item={item} index={index} pct={pct} />)}
-      {items.length === 0 && <div class={emptyState}>{EMPTY_ROWS}</div>}
+      {items.length === 0 && <div class={emptyState}>{t.table.empty}</div>}
     </div>
     <div class:list={[rowGrid, 'mt-2 rounded-tile bg-lavender py-3.5 font-semibold']}>
-      <span class="col-[1/5] max-sm:col-span-full">Suma (<span id="count">{countLabel(totals.active, totals.count)}</span>)</span>
+      <span class="col-[1/5] max-sm:col-span-full">{t.table.sum} (<span id="count">{t.table.countLabel(totals.active, totals.count)}</span>)</span>
       <span class:list={[numCell, 'max-sm:col-start-2']}>
-        <span class:list={[mobileLabelBase, 'text-ink/70']}>Precio total</span><span class:list={[outValue, 'text-[1.05rem] font-bold']} id="sumTotal"
-          >{money(totals.total)}</span
+        <span class:list={[mobileLabelBase, 'text-ink/70']}>{t.table.totalPrice}</span><span class:list={[outValue, 'text-[1.05rem] font-bold']} id="sumTotal"
+          >{money(totals.total, t.locale)}</span
         >
       </span>
       <span class:list={[numCell, 'max-sm:col-start-3']}>
-        <span class:list={[mobileLabelBase, 'text-ink/70']}>Con descuento</span><span class:list={[outValue, 'text-[1.05rem] font-bold']} id="sumDisc"
-          >{money(totals.pay)}</span
+        <span class:list={[mobileLabelBase, 'text-ink/70']}>{t.table.discounted}</span><span class:list={[outValue, 'text-[1.05rem] font-bold']} id="sumDisc"
+          >{money(totals.pay, t.locale)}</span
         >
       </span>
       <span></span>
@@ -63,11 +65,11 @@ const { items, pct, totals, examples } = Astro.props;
         stroke-linecap="round"
         aria-hidden="true"><path d="M8 3v10M3 8h10"></path></svg
       >
-      Agregar ítem
+      {t.actions.add}
     </button>
-    <button class="btn btn-ghost" id="clear" type="button">Vaciar lista</button>
+    <button class="btn btn-ghost" id="clear" type="button">{t.actions.clear}</button>
     <button class="btn btn-dark" id="pdf" type="button">
-      Descargar PDF
+      {t.actions.pdf}
       <svg
         class="size-4"
         viewBox="0 0 16 16"
@@ -79,7 +81,7 @@ const { items, pct, totals, examples } = Astro.props;
         aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"></path></svg
       >
     </button>
-    <p class="note max-sm:col-span-2" id="note">{examples ? EXAMPLES_NOTE : ''}</p>
+    <p class="note max-sm:col-span-2" id="note">{examples ? t.table.examplesNote : ''}</p>
   </div>
   <p class="note -mt-1" id="pdfNote" hidden></p>
 </div>

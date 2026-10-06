@@ -2,14 +2,16 @@
 import Sparkle from './Sparkle.astro';
 import HostingerBanner from './HostingerBanner.astro';
 import { clampPct, money, num, type Totals } from '../lib/calc';
+import { dict } from '../i18n';
 
-/** Estado inicial, renderizado en el build. */
+/** Estado inicial, renderizado en el servidor. */
 interface Props {
   totals: Totals;
   pct: number | string;
 }
 
 const { totals, pct } = Astro.props;
+const t = dict(Astro.locals.lang);
 ---
 
 <section class="flex flex-col gap-4 lg:sticky lg:top-6 lg:col-start-2 lg:row-span-2 lg:row-start-2 lg:self-start">
@@ -19,32 +21,32 @@ const { totals, pct } = Astro.props;
     >
       <Sparkle id="pay-sparkle" class="pointer-events-none absolute -top-3 -right-3 size-28 opacity-25" />
       <Sparkle id="pay-sparkle-small" class="pointer-events-none absolute top-29 right-7 size-4 opacity-40" />
-      <span class="label relative text-ink/70">Total a pagar</span>
+      <span class="label relative text-ink/70">{t.results.pay}</span>
       <div
         id="pay"
         class="relative mt-3 text-[3rem] leading-none font-bold tracking-[-0.02em] tabular-nums wrap-anywhere max-sm:text-[2.4rem]"
       >
-        {money(totals.pay)}
+        {money(totals.pay, t.locale)}
       </div>
-      <p class="relative mt-3 text-[.9rem] text-ink/75">Suma con descuento de los ítems activos.</p>
+      <p class="relative mt-3 text-[.9rem] text-ink/75">{t.results.payHint}</p>
     </div>
     <div class="rounded-card bg-mint p-6 shadow-card sm:p-7">
-      <span class="label text-mint-ink">Ganancia potencial</span>
+      <span class="label text-mint-ink">{t.results.gain}</span>
       <div
         id="gain"
         class="mt-2.5 text-[1.9rem] leading-none font-bold tracking-[-0.01em] text-mint-ink tabular-nums wrap-anywhere max-sm:text-[1.6rem]"
       >
-        {money(totals.gain)}
+        {money(totals.gain, t.locale)}
       </div>
       <p class="mt-3 text-[.9rem] text-ink/75">
-        Suma de precio total menos total a pagar (<span id="pctEcho">{num(clampPct(pct))}</span> % del total).
+        {t.results.gainHintBefore}<span id="pctEcho">{num(clampPct(pct), t.locale)}</span>{t.results.gainHintAfter}
       </p>
     </div>
   </div>
 
   <p class="m-0 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-[.8rem] text-muted">
     <span>
-      Made with <svg
+      {t.results.madeWith} <svg
         class="inline-block size-[1.05em] align-[-0.17em]"
         viewBox="0 0 24 24"
         fill="currentColor"
@@ -53,7 +55,7 @@ const { totals, pct } = Astro.props;
         ><path
           d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 01-.383-.218 25.18 25.18 0 01-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0112 5.052 5.5 5.5 0 0116.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 01-4.244 3.17 15.247 15.247 0 01-.383.219l-.022.012-.007.004-.003.001a.752.752 0 01-.704 0l-.003-.001z"
         ></path></svg
-      ><span class="sr-only">love</span> by <a
+      ><span class="sr-only">{t.results.love}</span> {t.results.by} <a
         href="mailto:hello@mahebo.com"
         class="rounded-sm font-semibold text-ink underline decoration-accent decoration-2 underline-offset-3 transition-colors hover:text-accent"
         >Mahebo™</a
@@ -64,8 +66,8 @@ const { totals, pct } = Astro.props;
       target="_blank"
       rel="noopener noreferrer"
       class="grid size-7 place-items-center rounded-full text-muted transition-colors hover:bg-surface hover:text-ink"
-      aria-label="Mahebo en GitHub"
-      title="Mahebo en GitHub"
+      aria-label={t.results.githubAria}
+      title={t.results.githubAria}
     >
       <svg class="size-4" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true" focusable="false"
         ><path
